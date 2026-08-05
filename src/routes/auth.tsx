@@ -49,9 +49,13 @@ function AuthPage() {
         });
         if (error) throw error;
         if (!data.session) {
-          toast.success("Check your email to confirm your account.");
-          return;
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (signInError) throw signInError;
         }
+        toast.success("Welcome to Neon");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;

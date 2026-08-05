@@ -18,7 +18,13 @@ export type FeedPost = {
   profiles: { username: string; display_name: string; avatar_url: string | null } | null;
 };
 
-export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserId?: string }) {
+export function PostCard({
+  post,
+  currentUserId,
+}: {
+  post: FeedPost;
+  currentUserId?: string | undefined;
+}) {
   const qc = useQueryClient();
   const [showComments, setShowComments] = useState(false);
   const [text, setText] = useState("");

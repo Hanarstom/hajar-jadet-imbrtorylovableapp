@@ -13,8 +13,8 @@ const AD_HTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,bo
 
 export function SponsoredSlot({ id }: { id: string }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-3">
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+    <div className="glass rounded-2xl p-3">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/70">
         Sponsored Content
       </p>
       <div className="flex justify-center">

@@ -73,14 +73,14 @@ export function PostCard({
   });
 
   return (
-    <article className="rounded-xl border border-border bg-card p-4">
+    <article className="glass glass-hover rounded-2xl p-4">
       <header className="flex items-center justify-between gap-2">
         <Link
           to="/u/$username"
           params={{ username: post.profiles?.username ?? "" }}
           className="flex items-center gap-2"
         >
-          <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-secondary text-sm font-semibold">
+          <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-primary/30 bg-secondary text-sm font-semibold">
             {post.profiles?.avatar_url ? (
               <img
                 src={post.profiles.avatar_url}
@@ -116,14 +116,15 @@ export function PostCard({
       {post.hashtags && <p className="mt-1 text-sm text-primary">{post.hashtags}</p>}
 
       {videoId && (
-        <div className="relative mt-3 overflow-hidden rounded-lg border border-border">
+        <div className="relative mt-3 overflow-hidden rounded-2xl border border-primary/20">
           <img
             src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
             alt="Locked video preview"
-            className="h-52 w-full scale-110 object-cover blur-md"
+            className="h-56 w-full scale-110 object-cover blur-lg"
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-background/40">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/55">
             <Button
+              className="rounded-full font-bold shadow-neon"
               onClick={() => openViaDirectLink(`https://www.youtube.com/watch?v=${videoId}`)}
             >
               <Play className="mr-1 h-4 w-4" /> Play Video

@@ -92,7 +92,7 @@ function Feed() {
   return (
     <Layout>
       <div className="space-y-4">
-        <div className="rounded-xl border border-border bg-card p-3">
+        <div className="glass flex items-center gap-2 rounded-full px-4 py-2.5">
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
@@ -122,7 +122,7 @@ function Feed() {
 
         {user ? (
           <form
-            className="space-y-2 rounded-xl border border-border bg-card p-4"
+            className="glass space-y-2 rounded-2xl p-4"
             onSubmit={(e) => {
               e.preventDefault();
               if (content.trim() || videoUrl.trim()) publish.mutate();
@@ -151,7 +151,7 @@ function Feed() {
             </Button>
           </form>
         ) : (
-          <div className="rounded-xl border border-border bg-card p-4 text-sm">
+          <div className="glass rounded-2xl p-4 text-sm">
             <Link to="/auth" className="text-primary underline">
               Sign in
             </Link>{" "}

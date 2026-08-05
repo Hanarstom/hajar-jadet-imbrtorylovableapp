@@ -37,7 +37,7 @@ type Person = {
   avatar_url: string | null;
 };
 
-function PersonRow({ person, currentUserId }: { person: Person; currentUserId?: string }) {
+function PersonRow({ person, currentUserId }: { person: Person; currentUserId?: string | undefined }) {
   const qc = useQueryClient();
 
   const following = useQuery({

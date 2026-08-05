@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as EarningsRouteImport } from './routes/earnings'
+import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 
@@ -30,6 +31,11 @@ const EarningsRoute = EarningsRouteImport.update({
   path: '/earnings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FriendsRoute = FriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/earnings': typeof EarningsRoute
+  '/friends': typeof FriendsRoute
   '/profile': typeof ProfileRoute
   '/u/$username': typeof UUsernameRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/earnings': typeof EarningsRoute
+  '/friends': typeof FriendsRoute
   '/profile': typeof ProfileRoute
   '/u/$username': typeof UUsernameRoute
 }
@@ -60,21 +68,31 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/earnings': typeof EarningsRoute
+  '/friends': typeof FriendsRoute
   '/profile': typeof ProfileRoute
   '/u/$username': typeof UUsernameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/earnings' | '/profile' | '/u/$username'
+  fullPaths:
+    '/' | '/auth' | '/earnings' | '/friends' | '/profile' | '/u/$username'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/earnings' | '/profile' | '/u/$username'
-  id: '__root__' | '/' | '/auth' | '/earnings' | '/profile' | '/u/$username'
+  to: '/' | '/auth' | '/earnings' | '/friends' | '/profile' | '/u/$username'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/earnings'
+    | '/friends'
+    | '/profile'
+    | '/u/$username'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   EarningsRoute: typeof EarningsRoute
+  FriendsRoute: typeof FriendsRoute
   ProfileRoute: typeof ProfileRoute
   UUsernameRoute: typeof UUsernameRoute
 }
@@ -102,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EarningsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/friends': {
+      id: '/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof FriendsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -123,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   EarningsRoute: EarningsRoute,
+  FriendsRoute: FriendsRoute,
   ProfileRoute: ProfileRoute,
   UUsernameRoute: UUsernameRoute,
 }

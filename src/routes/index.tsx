@@ -92,9 +92,10 @@ function Feed() {
   return (
     <Layout>
       <div className="space-y-4">
-        <div className="glass flex items-center gap-2 rounded-full px-4 py-2.5">
+        <div className="glass rounded-2xl p-3">
           <div className="flex items-center gap-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
+            <Search className="h-4 w-4 shrink-0 text-primary" />
+
             <Input
               value={term}
               onChange={(e) => setTerm(e.target.value)}

@@ -32,7 +32,7 @@ export const Route = createFileRoute("/earnings")({
 function StatRow({ label, value, goal }: { label: string; value: number; goal: number }) {
   const pct = Math.min(100, (value / goal) * 100);
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="glass rounded-2xl p-4">
       <div className="flex items-baseline justify-between">
         <span className="text-sm text-muted-foreground">{label}</span>
         <span className="text-sm">
@@ -101,7 +101,7 @@ function Earnings() {
         <StatRow label="Watch hours" value={s.watchHours} goal={GOALS.watchHours} />
         <StatRow label="Total views" value={s.views} goal={GOALS.views} />
       </div>
-      <div className="mt-5 rounded-xl border border-border bg-card p-4">
+      <div className="mt-5 glass rounded-2xl p-4">
         <Button className="w-full" disabled={!eligible}>
           <Lock className="mr-1 h-4 w-4" />
           Withdraw via Binance / PayPal

@@ -12,6 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as EarningsRouteImport } from './routes/earnings'
+import { Route as FriendsRouteImport } from './routes/friends'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ReelsRouteImport } from './routes/reels'
+import { Route as VideosRouteImport } from './routes/videos'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +33,26 @@ const EarningsRoute = EarningsRouteImport.update({
   path: '/earnings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FriendsRoute = FriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReelsRoute = ReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -39,12 +63,20 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/earnings': typeof EarningsRoute
+  '/friends': typeof FriendsRoute
+  '/profile': typeof ProfileRoute
+  '/reels': typeof ReelsRoute
+  '/videos': typeof VideosRoute
   '/u/$username': typeof UUsernameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/earnings': typeof EarningsRoute
+  '/friends': typeof FriendsRoute
+  '/profile': typeof ProfileRoute
+  '/reels': typeof ReelsRoute
+  '/videos': typeof VideosRoute
   '/u/$username': typeof UUsernameRoute
 }
 export interface FileRoutesById {
@@ -52,20 +84,53 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/earnings': typeof EarningsRoute
+  '/friends': typeof FriendsRoute
+  '/profile': typeof ProfileRoute
+  '/reels': typeof ReelsRoute
+  '/videos': typeof VideosRoute
   '/u/$username': typeof UUsernameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/earnings' | '/u/$username'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/earnings'
+    | '/friends'
+    | '/profile'
+    | '/reels'
+    | '/videos'
+    | '/u/$username'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/earnings' | '/u/$username'
-  id: '__root__' | '/' | '/auth' | '/earnings' | '/u/$username'
+  to:
+    | '/'
+    | '/auth'
+    | '/earnings'
+    | '/friends'
+    | '/profile'
+    | '/reels'
+    | '/videos'
+    | '/u/$username'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/earnings'
+    | '/friends'
+    | '/profile'
+    | '/reels'
+    | '/videos'
+    | '/u/$username'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   EarningsRoute: typeof EarningsRoute
+  FriendsRoute: typeof FriendsRoute
+  ProfileRoute: typeof ProfileRoute
+  ReelsRoute: typeof ReelsRoute
+  VideosRoute: typeof VideosRoute
   UUsernameRoute: typeof UUsernameRoute
 }
 
@@ -92,6 +157,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EarningsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/friends': {
+      id: '/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof FriendsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reels': {
+      id: '/reels'
+      path: '/reels'
+      fullPath: '/reels'
+      preLoaderRoute: typeof ReelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -106,18 +199,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   EarningsRoute: EarningsRoute,
+  FriendsRoute: FriendsRoute,
+  ProfileRoute: ProfileRoute,
+  ReelsRoute: ReelsRoute,
+  VideosRoute: VideosRoute,
   UUsernameRoute: UUsernameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

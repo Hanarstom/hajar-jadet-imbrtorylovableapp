@@ -1,11 +1,13 @@
+import { useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Eye, Users, Clock } from "lucide-react";
+import { Eye, Users, Clock, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { PostCard, type FeedPost } from "@/components/PostCard";
 import { useSession } from "@/hooks/useSession";
 import { formatCount } from "@/lib/neon";
+import { cropToSquare, uploadMedia, useMediaUrl } from "@/lib/media";
 
 function StatTile({
   icon: Icon,

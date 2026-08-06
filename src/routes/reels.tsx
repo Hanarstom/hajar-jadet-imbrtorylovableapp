@@ -56,7 +56,7 @@ function Reels() {
         {reels.isLoading && <p className="text-sm text-muted-foreground">Loading reels…</p>}
         {reels.data?.map((post, i) => (
           <div key={post.id} className="space-y-4">
-            <PostCard post={post} currentUserId={user?.id} />
+            <PostCard post={post} currentUserId={user?.id} unlocked />
             {(i + 1) % 3 === 0 && <SponsoredSlot id={`reels-${i}`} />}
           </div>
         ))}

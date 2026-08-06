@@ -160,6 +160,8 @@ function Feed() {
           </div>
         )}
 
+        <Stories />
+
         <SponsoredSlot id="feed-top" />
 
         {feed.isLoading && <p className="text-sm text-muted-foreground">Loading feed…</p>}

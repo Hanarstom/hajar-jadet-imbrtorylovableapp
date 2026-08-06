@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Layout } from "@/components/Layout";
+import { Avatar } from "@/components/Avatar";
 import { useSession } from "@/hooks/useSession";
 
 export const Route = createFileRoute("/friends")({

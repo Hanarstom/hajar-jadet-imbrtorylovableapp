@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Layout } from "@/components/Layout";
 import { PostCard, type FeedPost } from "@/components/PostCard";
 import { SponsoredSlot } from "@/components/SponsoredSlot";
+import { Stories } from "@/components/Stories";
 import { useSession } from "@/hooks/useSession";
 
 export const Route = createFileRoute("/")({

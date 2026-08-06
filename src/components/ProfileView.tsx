@@ -1,11 +1,13 @@
+import { useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Eye, Users, Clock } from "lucide-react";
+import { Eye, Users, Clock, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { PostCard, type FeedPost } from "@/components/PostCard";
 import { useSession } from "@/hooks/useSession";
 import { formatCount } from "@/lib/neon";
+import { cropToSquare, uploadMedia, useMediaUrl } from "@/lib/media";
 
 function StatTile({
   icon: Icon,
@@ -114,6 +116,27 @@ export function ProfileView({ username }: { username: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const avatarUrl = useMediaUrl(profile.data?.avatar_url);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const uploadAvatar = useMutation({
+    mutationFn: async (file: File) => {
+      if (!user) throw new Error("Sign in to update your picture");
+      const blob = await cropToSquare(file, 512);
+      const path = await uploadMedia(user.id, "avatars", blob);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: path })
+        .eq("id", user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Profile picture updated");
+      qc.invalidateQueries({ queryKey: ["profile", username] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (profile.isLoading)
     return <p className="text-sm text-muted-foreground">Loading profile…</p>;
 
@@ -123,6 +146,7 @@ export function ProfileView({ username }: { username: string }) {
     );
 
   const p = profile.data;
+  const isMe = user?.id === p.id;
 
   return (
     <div className="space-y-4">
@@ -131,9 +155,9 @@ export function ProfileView({ username }: { username: string }) {
         <div className="relative mx-auto h-28 w-28">
           <div className="absolute inset-0 rounded-full bg-primary/25 blur-xl" />
           <span className="relative grid h-28 w-28 place-items-center overflow-hidden rounded-full border-2 border-primary/60 bg-secondary text-3xl font-black shadow-neon">
-            {p.avatar_url ? (
+            {avatarUrl ? (
               <img
-                src={p.avatar_url}
+                src={avatarUrl}
                 alt={`${p.display_name} avatar`}
                 className="h-full w-full object-cover"
               />
@@ -141,7 +165,34 @@ export function ProfileView({ username }: { username: string }) {
               (p.display_name || p.username).charAt(0).toUpperCase()
             )}
           </span>
+          {isMe && (
+            <>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadAvatar.mutate(f);
+                  e.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                aria-label="Change profile picture"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploadAvatar.isPending}
+                className="absolute -bottom-1 right-0 grid h-9 w-9 place-items-center rounded-full border border-primary/60 bg-background text-primary shadow-neon"
+              >
+                <Camera className="h-4 w-4" />
+              </button>
+            </>
+          )}
         </div>
+        {isMe && uploadAvatar.isPending && (
+          <p className="mt-2 text-xs text-muted-foreground">Uploading…</p>
+        )}
 
         <h1 className="mt-4 truncate text-2xl font-black tracking-tight">
           {p.display_name || p.username}

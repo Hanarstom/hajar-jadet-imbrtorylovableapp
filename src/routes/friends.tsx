@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Layout } from "@/components/Layout";
+import { Avatar } from "@/components/Avatar";
 import { useSession } from "@/hooks/useSession";
 
 export const Route = createFileRoute("/friends")({
@@ -86,17 +87,11 @@ function PersonRow({ person, currentUserId }: { person: Person; currentUserId?: 
         params={{ username: person.username }}
         className="flex min-w-0 items-center gap-3"
       >
-        <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full border border-primary/30 bg-secondary text-sm font-bold">
-          {person.avatar_url ? (
-            <img
-              src={person.avatar_url}
-              alt={`${person.display_name} avatar`}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            (person.display_name || person.username).charAt(0).toUpperCase()
-          )}
-        </span>
+        <Avatar
+          src={person.avatar_url}
+          name={person.display_name || person.username}
+          className="h-11 w-11 shrink-0 text-sm font-bold"
+        />
         <span className="min-w-0">
           <span className="block truncate text-sm font-bold">
             {person.display_name || person.username}

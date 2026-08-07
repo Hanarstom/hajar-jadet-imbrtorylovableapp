@@ -185,3 +185,12 @@
   }
 
 }
+
+@keyframes crown-bounce {
+  0%, 100% { transform: translate(-50%, 0) scale(1); }
+  50% { transform: translate(-50%, -22%) scale(1.08); }
+}
+
+.crown-bounce {
+  animation: crown-bounce 1.1s ease-in-out infinite;
+}

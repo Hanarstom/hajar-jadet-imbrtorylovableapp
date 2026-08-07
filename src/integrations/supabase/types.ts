@@ -81,30 +81,106 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          meta: string | null
+          post_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          meta?: string | null
+          post_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          meta?: string | null
+          post_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_views: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_views_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           content: string
           created_at: string
           hashtags: string | null
           id: string
+          platform: string
           user_id: string
           video_url: string | null
+          views_count: number
         }
         Insert: {
           content?: string
           created_at?: string
           hashtags?: string | null
           id?: string
+          platform?: string
           user_id: string
           video_url?: string | null
+          views_count?: number
         }
         Update: {
           content?: string
           created_at?: string
           hashtags?: string | null
           id?: string
+          platform?: string
           user_id?: string
           video_url?: string | null
+          views_count?: number
         }
         Relationships: [
           {
@@ -123,6 +199,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          profile_views: number
           total_views: number
           username: string
           watch_hours: number
@@ -133,6 +210,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id: string
+          profile_views?: number
           total_views?: number
           username: string
           watch_hours?: number
@@ -143,6 +221,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          profile_views?: number
           total_views?: number
           username?: string
           watch_hours?: number
@@ -174,6 +253,32 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saves: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saves_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
@@ -221,7 +326,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      leaderboard_24h: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          score: number
+          username: string
+        }[]
+      }
+      register_post_view: { Args: { _post_id: string }; Returns: undefined }
+      register_profile_view: {
+        Args: { _profile_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       reaction_type: "like" | "love" | "haha" | "sad"

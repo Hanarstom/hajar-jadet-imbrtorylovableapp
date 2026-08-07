@@ -61,7 +61,7 @@ export function TikTokIcon({ className = "h-5 w-5" }: { className?: string }) {
 
 export function PlatformIcon({
   platform,
-  className,
+  className = "h-5 w-5",
 }: {
   platform: Platform;
   className?: string;

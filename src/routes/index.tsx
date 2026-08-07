@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Layout } from "@/components/Layout";
-import { PostCard, type FeedPost } from "@/components/PostCard";
+import { PostCard, POST_SELECT, type FeedPost } from "@/components/PostCard";
+import { ReelComposer } from "@/components/ReelComposer";
+import { Leaderboard } from "@/components/Leaderboard";
 import { SponsoredSlot } from "@/components/SponsoredSlot";
 import { Stories } from "@/components/Stories";
 import { useSession } from "@/hooks/useSession";
@@ -16,17 +15,19 @@ import { useSession } from "@/hooks/useSession";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Neon — Live Creator Feed for Reels & Shorts" },
+      { title: "Neon — Vertical Reels Feed for Creators" },
       {
         name: "description",
         content:
-          "Neon is a live social feed where creators post text, hashtags and YouTube Shorts, follow each other and track views.",
+          "Neon is a vertical reels feed: share YouTube Shorts, Instagram, Facebook and TikTok reels, follow creators and track real views.",
       },
-      { property: "og:title", content: "Neon — Live Creator Feed" },
+      { property: "og:title", content: "Neon — Vertical Reels Feed" },
       {
         property: "og:description",
-        content: "Post, follow and comment on the Neon creator feed.",
+        content: "Post reels from YouTube, Instagram, Facebook and TikTok on Neon.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Feed,
@@ -34,10 +35,6 @@ export const Route = createFileRoute("/")({
 
 function Feed() {
   const { user } = useSession();
-  const qc = useQueryClient();
-  const [content, setContent] = useState("");
-  const [hashtags, setHashtags] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
   const [term, setTerm] = useState("");
 
   const feed = useQuery({
@@ -45,9 +42,7 @@ function Feed() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("posts")
-        .select(
-          "id, user_id, content, hashtags, video_url, created_at, profiles(username, display_name, avatar_url)",
-        )
+        .select(POST_SELECT)
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -67,27 +62,6 @@ function Feed() {
       if (error) throw error;
       return data ?? [];
     },
-  });
-
-  const publish = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error("Sign in to publish");
-      const { error } = await supabase.from("posts").insert({
-        user_id: user.id,
-        content: content.trim(),
-        hashtags: hashtags.trim(),
-        video_url: videoUrl.trim() || null,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      setContent("");
-      setHashtags("");
-      setVideoUrl("");
-      toast.success("Posted");
-      qc.invalidateQueries({ queryKey: ["feed"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   return (
@@ -122,42 +96,16 @@ function Feed() {
           )}
         </div>
 
+        <Leaderboard />
+
         {user ? (
-          <form
-            className="glass space-y-2 rounded-2xl p-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (content.trim() || videoUrl.trim()) publish.mutate();
-            }}
-          >
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="What's happening?"
-              maxLength={1000}
-            />
-            <Input
-              value={hashtags}
-              onChange={(e) => setHashtags(e.target.value)}
-              placeholder="#neon #shorts"
-              maxLength={200}
-            />
-            <Input
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              placeholder="YouTube or Shorts link (optional)"
-              maxLength={300}
-            />
-            <Button type="submit" disabled={publish.isPending}>
-              Publish
-            </Button>
-          </form>
+          <ReelComposer userId={user.id} />
         ) : (
           <div className="glass rounded-2xl p-4 text-sm">
             <Link to="/auth" className="text-primary underline">
               Sign in
             </Link>{" "}
-            to publish posts, follow creators and comment.
+            to publish reels, follow creators and comment.
           </div>
         )}
 
@@ -173,7 +121,7 @@ function Feed() {
           </div>
         ))}
         {feed.data?.length === 0 && (
-          <p className="text-sm text-muted-foreground">No posts yet — be the first.</p>
+          <p className="text-sm text-muted-foreground">No reels yet — be the first.</p>
         )}
       </div>
     </Layout>

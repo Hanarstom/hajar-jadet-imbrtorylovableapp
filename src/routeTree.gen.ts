@@ -16,6 +16,7 @@ import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReelsRouteImport } from './routes/reels'
+import { Route as RPostIdRouteImport } from './routes/r.$postId'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +54,11 @@ const ReelsRoute = ReelsRouteImport.update({
   path: '/reels',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RPostIdRoute = RPostIdRouteImport.update({
+  id: '/r/$postId',
+  path: '/r/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
+  '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
+  '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
+  '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/reels'
+    | '/r/$postId'
     | '/u/$username'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/reels'
+    | '/r/$postId'
     | '/u/$username'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/reels'
+    | '/r/$postId'
     | '/u/$username'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   ProfileRoute: typeof ProfileRoute
   ReelsRoute: typeof ReelsRoute
+  RPostIdRoute: typeof RPostIdRoute
   UUsernameRoute: typeof UUsernameRoute
 }
 
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReelsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/r/$postId': {
+      id: '/r/$postId'
+      path: '/r/$postId'
+      fullPath: '/r/$postId'
+      preLoaderRoute: typeof RPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   ProfileRoute: ProfileRoute,
   ReelsRoute: ReelsRoute,
+  RPostIdRoute: RPostIdRoute,
   UUsernameRoute: UUsernameRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Zap, LogOut, BarChart3 } from "lucide-react";
+import { Zap, LogOut, BarChart3, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSession";
@@ -25,6 +25,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <span className="neon-text truncate text-lg font-black tracking-tight">Neon</span>
           </Link>
           <nav className="flex items-center gap-1">
+            <Button asChild variant="ghost" size="sm" className="relative">
+              <Link to="/notifications" aria-label="الإشعارات">
+                <Bell className="h-4 w-4 text-destructive" />
+              </Link>
+            </Button>
             <Button asChild variant="ghost" size="sm">
               <Link to="/earnings" aria-label="Earnings">
                 <BarChart3 className="h-4 w-4" />

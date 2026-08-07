@@ -1,10 +1,12 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Eye, Users, Clock, Camera } from "lucide-react";
+import { Eye, Users, Clock, Camera, Pencil, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { PostCard, type FeedPost } from "@/components/PostCard";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { PostCard, POST_SELECT, type FeedPost } from "@/components/PostCard";
 import { useSession } from "@/hooks/useSession";
 import { formatCount } from "@/lib/neon";
 import { cropToSquare, uploadMedia, useMediaUrl } from "@/lib/media";
@@ -32,13 +34,19 @@ function StatTile({
 export function ProfileView({ username }: { username: string }) {
   const { user } = useSession();
   const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
+  const counted = useRef(false);
 
   const profile = useQuery({
     queryKey: ["profile", username],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, display_name, avatar_url, bio, total_views, watch_hours")
+        .select(
+          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views",
+        )
         .eq("username", username)
         .maybeSingle();
       if (error) throw error;
@@ -47,6 +55,15 @@ export function ProfileView({ username }: { username: string }) {
   });
 
   const profileId = profile.data?.id;
+  const isMe = !!user && user.id === profileId;
+
+  useEffect(() => {
+    if (!profileId || counted.current || isMe) return;
+    counted.current = true;
+    void supabase
+      .rpc("register_profile_view", { _profile_id: profileId })
+      .then(() => qc.invalidateQueries({ queryKey: ["profile", username] }));
+  }, [profileId, isMe, qc, username]);
 
   const followers = useQuery({
     queryKey: ["followers", profileId],
@@ -82,9 +99,7 @@ export function ProfileView({ username }: { username: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("posts")
-        .select(
-          "id, user_id, content, hashtags, video_url, created_at, profiles(username, display_name, avatar_url)",
-        )
+        .select(POST_SELECT)
         .eq("user_id", profileId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -112,6 +127,23 @@ export function ProfileView({ username }: { username: string }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["is-following", profileId, user?.id] });
       qc.invalidateQueries({ queryKey: ["followers", profileId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const saveProfile = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error("Sign in first");
+      const { error } = await supabase
+        .from("profiles")
+        .update({ display_name: name.trim(), bio: bio.trim() })
+        .eq("id", user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setEditing(false);
+      toast.success("تم تحديث الملف");
+      qc.invalidateQueries({ queryKey: ["profile", username] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -146,7 +178,6 @@ export function ProfileView({ username }: { username: string }) {
     );
 
   const p = profile.data;
-  const isMe = user?.id === p.id;
 
   return (
     <div className="space-y-4">
@@ -194,17 +225,81 @@ export function ProfileView({ username }: { username: string }) {
           <p className="mt-2 text-xs text-muted-foreground">Uploading…</p>
         )}
 
-        <h1 className="mt-4 truncate text-2xl font-black tracking-tight">
-          {p.display_name || p.username}
-        </h1>
-        <p className="text-sm text-primary/80">@{p.username}</p>
-        {p.bio && (
-          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-            {p.bio}
-          </p>
+        {editing ? (
+          <div dir="rtl" className="mt-4 space-y-2 text-right">
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="الاسم الظاهر"
+              maxLength={40}
+            />
+            <Textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="البايو"
+              maxLength={200}
+            />
+            <div className="flex gap-2">
+              <Button
+                className="flex-1 font-bold"
+                onClick={() => saveProfile.mutate()}
+                disabled={saveProfile.isPending}
+              >
+                حفظ
+              </Button>
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={() => setEditing(false)}
+              >
+                إلغاء
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h1 className="mt-4 flex items-center justify-center gap-2 truncate text-2xl font-black tracking-tight">
+              {p.display_name || p.username}
+              {user && user.id !== p.id && (
+                <Button
+                  size="sm"
+                  onClick={() => toggleFollow.mutate()}
+                  disabled={toggleFollow.isPending}
+                  className={`rounded-full font-bold ${
+                    isFollowing.data
+                      ? "bg-destructive/20 text-destructive hover:bg-destructive/30"
+                      : "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  }`}
+                >
+                  {isFollowing.data ? "إلغاء المتابعة" : "متابعة"}
+                </Button>
+              )}
+              {isMe && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="rounded-full"
+                  aria-label="تعديل الملف"
+                  onClick={() => {
+                    setName(p.display_name || "");
+                    setBio(p.bio || "");
+                    setEditing(true);
+                  }}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
+            </h1>
+            <p className="text-sm text-primary/80">@{p.username}</p>
+            {p.bio && (
+              <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
+                {p.bio}
+              </p>
+            )}
+          </>
         )}
 
-        <div className="mt-5 grid grid-cols-3 gap-2">
+        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <StatTile icon={Users} label="Followers" value={formatCount(followers.data ?? 0)} />
           <StatTile
             icon={Eye}
@@ -216,25 +311,19 @@ export function ProfileView({ username }: { username: string }) {
             label="Watch Hours"
             value={formatCount(Number(p.watch_hours ?? 0))}
           />
+          <StatTile
+            icon={UserRound}
+            label="زوار الملف"
+            value={formatCount(Number(p.profile_views ?? 0))}
+          />
         </div>
-
-        {user && user.id !== p.id && (
-          <Button
-            className="mt-5 w-full rounded-xl font-bold shadow-neon"
-            variant={isFollowing.data ? "secondary" : "default"}
-            onClick={() => toggleFollow.mutate()}
-            disabled={toggleFollow.isPending}
-          >
-            {isFollowing.data ? "Unfollow" : "متابعة · Follow"}
-          </Button>
-        )}
       </section>
 
       {posts.data?.map((post) => (
-        <PostCard key={post.id} post={post} currentUserId={user?.id} />
+        <PostCard key={post.id} post={post} currentUserId={user?.id} unlocked />
       ))}
       {posts.data?.length === 0 && (
-        <p className="text-sm text-muted-foreground">No posts yet.</p>
+        <p className="text-sm text-muted-foreground">No reels yet.</p>
       )}
     </div>
   );

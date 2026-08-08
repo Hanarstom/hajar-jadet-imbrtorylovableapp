@@ -1,30 +1,31 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
 import { Layout } from "@/components/Layout";
+import { Avatar } from "@/components/Avatar";
 import { PostCard, POST_SELECT, type FeedPost } from "@/components/PostCard";
 import { ReelComposer } from "@/components/ReelComposer";
 import { Leaderboard } from "@/components/Leaderboard";
 import { SponsoredSlot } from "@/components/SponsoredSlot";
 import { Stories } from "@/components/Stories";
+import { RollingEmoji } from "@/components/RollingEmoji";
+import { PlatformAds } from "@/components/PlatformAds";
 import { useSession } from "@/hooks/useSession";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Neon — Vertical Reels Feed for Creators" },
+      { title: "منصة حجر الجاديت الإمبراطوري — ريلز عمودية" },
       {
         name: "description",
         content:
-          "Neon is a vertical reels feed: share YouTube Shorts, Instagram, Facebook and TikTok reels, follow creators and track real views.",
+          "منصة حجر الجاديت الإمبراطوري: انشر ريلز يوتيوب وإنستغرام وفيسبوك وتيك توك، تابع صانعي المحتوى، وتابع مشاهداتك الحقيقية.",
       },
-      { property: "og:title", content: "Neon — Vertical Reels Feed" },
+      { property: "og:title", content: "منصة حجر الجاديت الإمبراطوري" },
       {
         property: "og:description",
-        content: "Post reels from YouTube, Instagram, Facebook and TikTok on Neon.",
+        content: "ريلز عمودية، تفاعلات، قصص، ولوحة صدارة كل 24 ساعة.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -35,7 +36,21 @@ export const Route = createFileRoute("/")({
 
 function Feed() {
   const { user } = useSession();
-  const [term, setTerm] = useState("");
+  const [composing, setComposing] = useState(false);
+
+  const me = useQuery({
+    queryKey: ["me-avatar", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("display_name, avatar_url")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const feed = useQuery({
     queryKey: ["feed"],
@@ -50,70 +65,52 @@ function Feed() {
     },
   });
 
-  const search = useQuery({
-    queryKey: ["search", term],
-    enabled: term.trim().length > 1,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("username, display_name, avatar_url")
-        .or(`username.ilike.%${term.trim()}%,display_name.ilike.%${term.trim()}%`)
-        .limit(8);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
   return (
     <Layout>
       <div className="space-y-4">
-        <div className="glass rounded-2xl p-3">
-          <div className="flex items-center gap-2">
-            <Search className="h-4 w-4 shrink-0 text-primary" />
-
-            <Input
-              value={term}
-              onChange={(e) => setTerm(e.target.value)}
-              placeholder="Search creators by name or @username"
-              className="border-0 bg-transparent focus-visible:ring-0"
-            />
-          </div>
-          {search.data && search.data.length > 0 && (
-            <ul className="mt-2 space-y-1 border-t border-border pt-2">
-              {search.data.map((p) => (
-                <li key={p.username}>
-                  <Link
-                    to="/u/$username"
-                    params={{ username: p.username }}
-                    className="block rounded-md px-2 py-1 text-sm hover:bg-secondary"
-                  >
-                    {p.display_name}{" "}
-                    <span className="text-muted-foreground">@{p.username}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <RollingEmoji />
 
         <Leaderboard />
 
         {user ? (
-          <ReelComposer userId={user.id} />
+          <div className="glass rounded-2xl p-3">
+            <button
+              type="button"
+              dir="rtl"
+              onClick={() => setComposing((v) => !v)}
+              className="flex w-full items-center gap-3"
+            >
+              <Avatar
+                src={me.data?.avatar_url}
+                name={me.data?.display_name}
+                className="h-10 w-10 shrink-0 text-sm"
+              />
+              <span className="flex-1 rounded-full bg-secondary/70 px-4 py-2.5 text-right text-sm text-muted-foreground">
+                بم تفكر؟
+              </span>
+            </button>
+            {composing && (
+              <div className="mt-3 border-t border-border pt-3">
+                <ReelComposer userId={user.id} />
+              </div>
+            )}
+          </div>
         ) : (
-          <div className="glass rounded-2xl p-4 text-sm">
+          <div dir="rtl" className="glass rounded-2xl p-4 text-sm">
             <Link to="/auth" className="text-primary underline">
-              Sign in
+              سجّل الدخول
             </Link>{" "}
-            to publish reels, follow creators and comment.
+            لنشر الريلز، متابعة صانعي المحتوى والتعليق.
           </div>
         )}
 
         <Stories />
 
+        <PlatformAds />
+
         <SponsoredSlot id="feed-top" />
 
-        {feed.isLoading && <p className="text-sm text-muted-foreground">Loading feed…</p>}
+        {feed.isLoading && <p className="text-sm text-muted-foreground">جارٍ تحميل الريلز…</p>}
         {feed.data?.map((post, i) => (
           <div key={post.id} className="space-y-4">
             <PostCard post={post} currentUserId={user?.id} />
@@ -121,7 +118,7 @@ function Feed() {
           </div>
         ))}
         {feed.data?.length === 0 && (
-          <p className="text-sm text-muted-foreground">No reels yet — be the first.</p>
+          <p className="text-sm text-muted-foreground">لا ريلز بعد — كن الأول.</p>
         )}
       </div>
     </Layout>

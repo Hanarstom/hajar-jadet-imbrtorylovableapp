@@ -30,7 +30,7 @@ export function reelEmbedUrl(url: string | null | undefined): string | null {
   if (!url || !platform) return null;
   if (platform === "youtube") {
     const id = extractYouTubeId(url);
-    return id ? `https://www.youtube.com/embed/${id}?playsinline=1&rel=0` : null;
+    return id ? `https://www.youtube.com/embed/${id}?playsinline=1&rel=0&autoplay=1&mute=1&loop=1&playlist=${id}` : null;
   }
   if (platform === "instagram") {
     const m = url.match(/instagram\.com\/(?:reel|reels|p|tv)\/([\w-]+)/i);

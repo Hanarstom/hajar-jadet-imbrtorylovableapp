@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PostCard, POST_SELECT, type FeedPost } from "@/components/PostCard";
 import { useSession } from "@/hooks/useSession";
+import { PresenceBadge } from "@/components/PresenceBadge";
 import { formatCount } from "@/lib/neon";
 import { cropToSquare, uploadMedia, useMediaUrl } from "@/lib/media";
 
@@ -45,7 +46,7 @@ export function ProfileView({ username }: { username: string }) {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views",
+          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views, last_seen_at",
         )
         .eq("username", username)
         .maybeSingle();
@@ -148,6 +149,21 @@ export function ProfileView({ username }: { username: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const profileStories = useQuery({
+    queryKey: ["profile-stories", profileId],
+    enabled: !!profileId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stories")
+        .select("id, body, created_at")
+        .eq("user_id", profileId!)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return (data ?? []).filter((s) => (s.body ?? "").trim().length > 0);
+    },
+  });
+
   const avatarUrl = useMediaUrl(profile.data?.avatar_url);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -161,10 +177,20 @@ export function ProfileView({ username }: { username: string }) {
         .update({ avatar_url: path })
         .eq("id", user.id);
       if (error) throw error;
+      // Auto post on the home feed + instant alert for followers only.
+      await supabase
+        .from("posts")
+        .insert({ user_id: user.id, content: "حدّثتُ صورة ملفي الشخصي 🖼️✨", platform: "profile" });
+      await supabase.rpc("notify_followers", {
+        _type: "avatar",
+        _meta: "حدّث صورة ملفه الشخصي",
+      } as unknown as { _type: string; _post_id: string; _meta: string });
     },
     onSuccess: () => {
-      toast.success("Profile picture updated");
+      toast.success("تم تحديث الصورة ونشرها بالرئيسية");
       qc.invalidateQueries({ queryKey: ["profile", username] });
+      qc.invalidateQueries({ queryKey: ["feed"] });
+      qc.invalidateQueries({ queryKey: ["profile-posts"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -299,6 +325,10 @@ export function ProfileView({ username }: { username: string }) {
           </>
         )}
 
+        <div className="mt-1 flex justify-center">
+          <PresenceBadge lastSeenAt={p.last_seen_at} />
+        </div>
+
         <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <StatTile icon={Users} label="Followers" value={formatCount(followers.data ?? 0)} />
           <StatTile
@@ -318,6 +348,24 @@ export function ProfileView({ username }: { username: string }) {
           />
         </div>
       </section>
+
+      {profileStories.data && profileStories.data.length > 0 && (
+        <section dir="rtl" className="glass rounded-2xl p-4">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            القصص النصية
+          </h2>
+          <ul className="mt-2 space-y-2">
+            {profileStories.data.map((s) => (
+              <li key={s.id} className="rounded-xl bg-secondary/60 px-3 py-2">
+                <p className="whitespace-pre-wrap text-sm">{s.body}</p>
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  {new Date(s.created_at).toLocaleString()}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {posts.data?.map((post) => (
         <PostCard key={post.id} post={post} currentUserId={user?.id} unlocked />

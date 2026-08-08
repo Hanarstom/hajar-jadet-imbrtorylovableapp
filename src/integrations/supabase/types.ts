@@ -122,6 +122,39 @@ export type Database = {
           },
         ]
       }
+      platform_ads: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          is_active: boolean
+          link_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          link_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          link_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_views: {
         Row: {
           created_at: string
@@ -199,6 +232,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          last_seen_at: string
           profile_views: number
           total_views: number
           username: string
@@ -210,6 +244,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id: string
+          last_seen_at?: string
           profile_views?: number
           total_views?: number
           username: string
@@ -221,6 +256,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          last_seen_at?: string
           profile_views?: number
           total_views?: number
           username?: string
@@ -336,11 +372,16 @@ export type Database = {
           username: string
         }[]
       }
+      notify_followers: {
+        Args: { _meta: string; _post_id: string; _type: string }
+        Returns: undefined
+      }
       register_post_view: { Args: { _post_id: string }; Returns: undefined }
       register_profile_view: {
         Args: { _profile_id: string }
         Returns: undefined
       }
+      touch_presence: { Args: never; Returns: undefined }
     }
     Enums: {
       reaction_type: "like" | "love" | "haha" | "sad"

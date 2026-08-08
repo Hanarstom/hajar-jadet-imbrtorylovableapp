@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, Heart, MessageCircle, UserPlus } from "lucide-react";
@@ -93,6 +94,14 @@ function Notifications() {
     },
   });
 
+  // Opening the tab resets the red counter.
+  useEffect(() => {
+    if (user && (list.data ?? []).some((n) => !n.is_read) && !markRead.isPending) {
+      markRead.mutate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, list.data]);
+
   if (!user && !loading)
     return (
       <Layout>
@@ -129,9 +138,11 @@ function Notifications() {
             const text =
               n.type === "follow"
                 ? `${name} بدأ بمتابعتك`
-                : n.type === "comment"
-                  ? `${name} علّق: ${n.meta ?? ""}`
-                  : `${name} ${REACTION_LABEL[n.meta ?? "like"] ?? "تفاعل مع"} ريلك`;
+                : n.type === "avatar"
+                  ? `${name} حدّث صورة ملفه الشخصي 🖼️`
+                  : n.type === "comment"
+                    ? `${name} علّق: ${n.meta ?? ""}`
+                    : `${name} ${REACTION_LABEL[n.meta ?? "like"] ?? "تفاعل مع"} ريلك`;
             const Icon =
               n.type === "follow"
                 ? UserPlus

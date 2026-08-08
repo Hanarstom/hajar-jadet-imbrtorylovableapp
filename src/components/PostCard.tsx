@@ -18,16 +18,16 @@ import { Avatar } from "@/components/Avatar";
 import { Comments } from "@/components/Comments";
 import { Reactions } from "@/components/Reactions";
 import { PlatformIcon } from "@/components/PlatformIcons";
+import { PresenceBadge } from "@/components/PresenceBadge";
 import {
   detectPlatform,
-  extractYouTubeId,
   formatCount,
   openViaDirectLink,
   reelEmbedUrl,
 } from "@/lib/neon";
 
 export const POST_SELECT =
-  "id, user_id, content, hashtags, video_url, platform, views_count, created_at, profiles(username, display_name, avatar_url)";
+  "id, user_id, content, hashtags, video_url, platform, views_count, created_at, profiles(username, display_name, avatar_url, last_seen_at)";
 
 export type FeedPost = {
   id: string;
@@ -38,17 +38,18 @@ export type FeedPost = {
   platform?: string | null;
   views_count?: number | null;
   created_at: string;
-  profiles: { username: string; display_name: string; avatar_url: string | null } | null;
+  profiles:
+    | { username: string; display_name: string; avatar_url: string | null; last_seen_at?: string | null }
+    | null;
 };
 
 export function PostCard({
   post,
   currentUserId,
-  unlocked = false,
 }: {
   post: FeedPost;
   currentUserId?: string | undefined;
-  /** When true the video plays inline with no blur or overlay button (Reels). */
+  /** Kept for compatibility — reels always play inline now. */
   unlocked?: boolean;
 }) {
   const qc = useQueryClient();
@@ -57,8 +58,8 @@ export function PostCard({
   const [showMore, setShowMore] = useState(false);
   const platform = detectPlatform(post.video_url);
   const embed = reelEmbedUrl(post.video_url);
-  const ytId = extractYouTubeId(post.video_url);
   const viewed = useRef(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   const views = useQuery({
     queryKey: ["views", post.id],
@@ -74,17 +75,45 @@ export function PostCard({
     initialData: Number(post.views_count ?? 0),
   });
 
+  /** Unique view: counted once per viewer, guarded locally and in the database. */
   async function registerView() {
     if (viewed.current) return;
     viewed.current = true;
+    const key = `neon-viewed:${post.id}`;
+    try {
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, "1");
+    } catch {
+      /* storage unavailable */
+    }
     await supabase.rpc("register_post_view", { _post_id: post.id });
     qc.invalidateQueries({ queryKey: ["views", post.id] });
   }
 
+  // +1 only after the reel stays genuinely on screen for 2 seconds.
   useEffect(() => {
-    if (unlocked && embed) void registerView();
+    const el = wrapRef.current;
+    if (!el || !embed) return;
+    let timer: number | undefined;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry && entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          timer ??= window.setTimeout(() => void registerView(), 2000);
+        } else if (timer) {
+          window.clearTimeout(timer);
+          timer = undefined;
+        }
+      },
+      { threshold: [0, 0.6, 1] },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      if (timer) window.clearTimeout(timer);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unlocked, embed]);
+  }, [embed, post.id]);
 
   const saved = useQuery({
     queryKey: ["saved", post.id, currentUserId],
@@ -170,6 +199,7 @@ export function PostCard({
             <span className="block text-xs text-muted-foreground">
               @{post.profiles?.username}
             </span>
+            <PresenceBadge lastSeenAt={post.profiles?.last_seen_at} />
           </span>
         </Link>
         <div className="flex items-center gap-1">
@@ -190,38 +220,21 @@ export function PostCard({
       {post.content && <p className="mt-3 whitespace-pre-wrap text-sm">{post.content}</p>}
       {post.hashtags && <p className="mt-1 text-sm text-primary">{post.hashtags}</p>}
 
-      {embed &&
-        (unlocked || !ytId ? (
-          <div className="mt-3 overflow-hidden rounded-2xl border border-primary/20">
-            <iframe
-              src={embed}
-              title={post.content || "Reel"}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              loading="lazy"
-              className="aspect-[9/16] w-full"
-            />
-          </div>
-        ) : (
-          <div className="relative mt-3 overflow-hidden rounded-2xl border border-primary/20">
-            <img
-              src={`https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`}
-              alt="Locked video preview"
-              className="h-56 w-full scale-110 object-cover blur-lg"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-background/55">
-              <Button
-                className="rounded-full font-bold shadow-neon"
-                onClick={() => {
-                  void registerView();
-                  openViaDirectLink(`https://www.youtube.com/watch?v=${ytId}`);
-                }}
-              >
-                <Play className="mr-1 h-4 w-4" /> Play Video
-              </Button>
-            </div>
-          </div>
-        ))}
+      {embed && (
+        <div
+          ref={wrapRef}
+          className="mt-3 overflow-hidden rounded-2xl border border-primary/20"
+        >
+          <iframe
+            src={embed}
+            title={post.content || "Reel"}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            loading="lazy"
+            className="aspect-[9/16] w-full"
+          />
+        </div>
+      )}
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <Reactions postId={post.id} currentUserId={currentUserId} />

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { playReactionSound } from "@/lib/feedback";
 
 type ReactionType = "like" | "love" | "haha" | "sad";
 
@@ -108,7 +109,10 @@ export function Reactions({
               type="button"
               title={r.label}
               aria-label={r.label}
-              onClick={() => react.mutate(r.type)}
+              onClick={() => {
+                playReactionSound(r.type);
+                react.mutate(r.type);
+              }}
               className={cn(
                 "grid h-9 w-9 place-items-center rounded-full text-lg transition-transform hover:scale-125",
                 mine === r.type && "bg-primary/20",

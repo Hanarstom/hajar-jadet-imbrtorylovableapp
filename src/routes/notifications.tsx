@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, Heart, MessageCircle, UserPlus } from "lucide-react";
@@ -92,6 +93,14 @@ function Notifications() {
       qc.invalidateQueries({ queryKey: ["notif-unread", user?.id] });
     },
   });
+
+  // Opening the tab resets the red counter.
+  useEffect(() => {
+    if (user && (list.data ?? []).some((n) => !n.is_read) && !markRead.isPending) {
+      markRead.mutate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, list.data]);
 
   if (!user && !loading)
     return (

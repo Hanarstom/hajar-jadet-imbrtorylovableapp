@@ -183,9 +183,8 @@ export function ProfileView({ username }: { username: string }) {
         .insert({ user_id: user.id, content: "حدّثتُ صورة ملفي الشخصي 🖼️✨", platform: "profile" });
       await supabase.rpc("notify_followers", {
         _type: "avatar",
-        _post_id: null,
         _meta: "حدّث صورة ملفه الشخصي",
-      });
+      } as unknown as { _type: string; _post_id: string; _meta: string });
     },
     onSuccess: () => {
       toast.success("تم تحديث الصورة ونشرها بالرئيسية");

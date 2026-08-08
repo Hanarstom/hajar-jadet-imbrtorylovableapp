@@ -46,11 +46,10 @@ export type FeedPost = {
 export function PostCard({
   post,
   currentUserId,
-  unlocked = false,
 }: {
   post: FeedPost;
   currentUserId?: string | undefined;
-  /** When true the video plays inline with no blur or overlay button (Reels). */
+  /** Kept for compatibility — reels always play inline now. */
   unlocked?: boolean;
 }) {
   const qc = useQueryClient();
@@ -59,8 +58,8 @@ export function PostCard({
   const [showMore, setShowMore] = useState(false);
   const platform = detectPlatform(post.video_url);
   const embed = reelEmbedUrl(post.video_url);
-  const ytId = extractYouTubeId(post.video_url);
   const viewed = useRef(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   const views = useQuery({
     queryKey: ["views", post.id],
@@ -76,17 +75,45 @@ export function PostCard({
     initialData: Number(post.views_count ?? 0),
   });
 
+  /** Unique view: counted once per viewer, guarded locally and in the database. */
   async function registerView() {
     if (viewed.current) return;
     viewed.current = true;
+    const key = `neon-viewed:${post.id}`;
+    try {
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, "1");
+    } catch {
+      /* storage unavailable */
+    }
     await supabase.rpc("register_post_view", { _post_id: post.id });
     qc.invalidateQueries({ queryKey: ["views", post.id] });
   }
 
+  // +1 only after the reel stays genuinely on screen for 2 seconds.
   useEffect(() => {
-    if (unlocked && embed) void registerView();
+    const el = wrapRef.current;
+    if (!el || !embed) return;
+    let timer: number | undefined;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry && entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          timer ??= window.setTimeout(() => void registerView(), 2000);
+        } else if (timer) {
+          window.clearTimeout(timer);
+          timer = undefined;
+        }
+      },
+      { threshold: [0, 0.6, 1] },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      if (timer) window.clearTimeout(timer);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unlocked, embed]);
+  }, [embed, post.id]);
 
   const saved = useQuery({
     queryKey: ["saved", post.id, currentUserId],

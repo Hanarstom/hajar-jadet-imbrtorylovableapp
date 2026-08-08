@@ -199,6 +199,7 @@ export function PostCard({
             <span className="block text-xs text-muted-foreground">
               @{post.profiles?.username}
             </span>
+            <PresenceBadge lastSeenAt={post.profiles?.last_seen_at} />
           </span>
         </Link>
         <div className="flex items-center gap-1">
@@ -219,38 +220,21 @@ export function PostCard({
       {post.content && <p className="mt-3 whitespace-pre-wrap text-sm">{post.content}</p>}
       {post.hashtags && <p className="mt-1 text-sm text-primary">{post.hashtags}</p>}
 
-      {embed &&
-        (unlocked || !ytId ? (
-          <div className="mt-3 overflow-hidden rounded-2xl border border-primary/20">
-            <iframe
-              src={embed}
-              title={post.content || "Reel"}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              loading="lazy"
-              className="aspect-[9/16] w-full"
-            />
-          </div>
-        ) : (
-          <div className="relative mt-3 overflow-hidden rounded-2xl border border-primary/20">
-            <img
-              src={`https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`}
-              alt="Locked video preview"
-              className="h-56 w-full scale-110 object-cover blur-lg"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-background/55">
-              <Button
-                className="rounded-full font-bold shadow-neon"
-                onClick={() => {
-                  void registerView();
-                  openViaDirectLink(`https://www.youtube.com/watch?v=${ytId}`);
-                }}
-              >
-                <Play className="mr-1 h-4 w-4" /> Play Video
-              </Button>
-            </div>
-          </div>
-        ))}
+      {embed && (
+        <div
+          ref={wrapRef}
+          className="mt-3 overflow-hidden rounded-2xl border border-primary/20"
+        >
+          <iframe
+            src={embed}
+            title={post.content || "Reel"}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            loading="lazy"
+            className="aspect-[9/16] w-full"
+          />
+        </div>
+      )}
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <Reactions postId={post.id} currentUserId={currentUserId} />

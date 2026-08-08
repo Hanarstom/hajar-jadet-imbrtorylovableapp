@@ -18,9 +18,9 @@ import { Avatar } from "@/components/Avatar";
 import { Comments } from "@/components/Comments";
 import { Reactions } from "@/components/Reactions";
 import { PlatformIcon } from "@/components/PlatformIcons";
+import { PresenceBadge } from "@/components/PresenceBadge";
 import {
   detectPlatform,
-  extractYouTubeId,
   formatCount,
   openViaDirectLink,
   reelEmbedUrl,

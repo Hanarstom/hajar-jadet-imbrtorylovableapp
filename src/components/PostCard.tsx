@@ -27,7 +27,7 @@ import {
 } from "@/lib/neon";
 
 export const POST_SELECT =
-  "id, user_id, content, hashtags, video_url, platform, views_count, created_at, profiles(username, display_name, avatar_url)";
+  "id, user_id, content, hashtags, video_url, platform, views_count, created_at, profiles(username, display_name, avatar_url, last_seen_at)";
 
 export type FeedPost = {
   id: string;

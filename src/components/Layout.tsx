@@ -29,7 +29,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="mx-auto max-w-2xl px-4 py-2.5">
           <div className="flex items-center gap-2">
             <Link to="/" className="min-w-0 flex-1">
-              <span className="neon-text block truncate text-base font-black tracking-tight">
+              <span className="neon-text block text-[13px] font-black leading-tight tracking-tight">
                 {PLATFORM_NAME}
               </span>
             </Link>

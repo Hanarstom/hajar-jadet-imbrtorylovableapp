@@ -145,6 +145,21 @@ function Friends() {
     },
   });
 
+  if (!user)
+    return (
+      <Layout>
+        <div dir="rtl" className="glass rounded-3xl p-8 text-center">
+          <p className="text-base font-black">سجل الآن لرؤية الأصدقاء</p>
+          <Link
+            to="/auth"
+            className="mt-3 inline-block rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground shadow-neon"
+          >
+            تسجيل الدخول
+          </Link>
+        </div>
+      </Layout>
+    );
+
   return (
     <Layout>
       <div className="space-y-4">

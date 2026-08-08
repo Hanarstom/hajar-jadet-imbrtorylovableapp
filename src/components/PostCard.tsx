@@ -38,7 +38,9 @@ export type FeedPost = {
   platform?: string | null;
   views_count?: number | null;
   created_at: string;
-  profiles: { username: string; display_name: string; avatar_url: string | null } | null;
+  profiles:
+    | { username: string; display_name: string; avatar_url: string | null; last_seen_at?: string | null }
+    | null;
 };
 
 export function PostCard({

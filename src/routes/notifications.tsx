@@ -138,9 +138,11 @@ function Notifications() {
             const text =
               n.type === "follow"
                 ? `${name} بدأ بمتابعتك`
-                : n.type === "comment"
-                  ? `${name} علّق: ${n.meta ?? ""}`
-                  : `${name} ${REACTION_LABEL[n.meta ?? "like"] ?? "تفاعل مع"} ريلك`;
+                : n.type === "avatar"
+                  ? `${name} حدّث صورة ملفه الشخصي 🖼️`
+                  : n.type === "comment"
+                    ? `${name} علّق: ${n.meta ?? ""}`
+                    : `${name} ${REACTION_LABEL[n.meta ?? "like"] ?? "تفاعل مع"} ريلك`;
             const Icon =
               n.type === "follow"
                 ? UserPlus

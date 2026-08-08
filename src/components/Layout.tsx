@@ -1,13 +1,22 @@
+import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Zap, LogOut, BarChart3, Bell } from "lucide-react";
+import { Search, LogOut, BarChart3, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useSession } from "@/hooks/useSession";
 import { BottomNav } from "@/components/BottomNav";
+import { usePresenceHeartbeat } from "@/hooks/usePresence";
+import { useNotificationAlerts } from "@/hooks/useNotificationAlerts";
+
+export const PLATFORM_NAME = "منصة حجر الجاديت الإمبراطوري";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user } = useSession();
   const navigate = useNavigate();
+  const [term, setTerm] = useState("");
+  usePresenceHeartbeat();
+  useNotificationAlerts();
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -16,38 +25,60 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen text-foreground">
-      <header className="sticky top-0 z-20 border-b border-primary/10 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto grid max-w-2xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
-          <Link to="/" className="flex min-w-0 items-center gap-2">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-primary/12 shadow-neon">
-              <Zap className="h-4 w-4 text-primary" />
-            </span>
-            <span className="neon-text truncate text-lg font-black tracking-tight">Neon</span>
-          </Link>
-          <nav className="flex items-center gap-1">
-            <Button asChild variant="ghost" size="sm" className="relative">
+      <header className="sticky top-0 z-20 border-b border-border bg-[#18191a]/95 backdrop-blur-xl">
+        <div className="mx-auto max-w-2xl px-4 py-2.5">
+          <div className="flex items-center gap-2">
+            <Link to="/" className="min-w-0 flex-1">
+              <span className="neon-text block truncate text-base font-black tracking-tight">
+                {PLATFORM_NAME}
+              </span>
+            </Link>
+            <Button asChild variant="ghost" size="sm" className="rounded-full">
               <Link to="/notifications" aria-label="الإشعارات">
                 <Bell className="h-4 w-4 text-destructive" />
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/earnings" aria-label="Earnings">
+            <Button asChild variant="ghost" size="sm" className="rounded-full">
+              <Link to="/earnings" aria-label="تحقيق الشروط">
                 <BarChart3 className="h-4 w-4" />
               </Link>
             </Button>
             {user ? (
-              <Button variant="ghost" size="sm" onClick={signOut} aria-label="Sign out">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-full"
+                onClick={signOut}
+                aria-label="خروج"
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             ) : (
-              <Button asChild size="sm">
-                <Link to="/auth">Sign in</Link>
+              <Button asChild size="sm" className="rounded-full font-bold">
+                <Link to="/auth">دخول</Link>
               </Button>
             )}
-          </nav>
+          </div>
+
+          <form
+            dir="rtl"
+            className="mt-2 flex items-center gap-2 rounded-full bg-secondary/70 px-3 py-1.5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              navigate({ to: "/friends" });
+            }}
+          >
+            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <Input
+              value={term}
+              onChange={(e) => setTerm(e.target.value)}
+              placeholder="ابحث في المنصة"
+              className="h-7 border-0 bg-transparent p-0 text-sm focus-visible:ring-0"
+            />
+          </form>
         </div>
       </header>
-      <main className="mx-auto max-w-2xl px-4 pb-28 pt-5">{children}</main>
+      <main className="mx-auto max-w-2xl px-4 pb-28 pt-4">{children}</main>
       <BottomNav />
     </div>
   );

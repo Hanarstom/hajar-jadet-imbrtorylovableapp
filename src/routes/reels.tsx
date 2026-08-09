@@ -5,7 +5,6 @@ import { Layout } from "@/components/Layout";
 import { POST_SELECT, type FeedPost } from "@/components/PostCard";
 import { ReelGrid } from "@/components/ReelGrid";
 import { SponsoredSlot } from "@/components/SponsoredSlot";
-import { useSession } from "@/hooks/useSession";
 
 export const Route = createFileRoute("/reels")({
   head: () => ({
@@ -29,7 +28,6 @@ export const Route = createFileRoute("/reels")({
 });
 
 function Reels() {
-  const { user } = useSession();
 
   const reels = useQuery({
     queryKey: ["reels"],

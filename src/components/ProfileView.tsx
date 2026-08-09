@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Eye, Users, Clock, Camera, Pencil, UserRound } from "lucide-react";
+import { Eye, Users, Clock, Camera, Pencil, UserRound, Film, Bookmark, BarChart3, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { useSession } from "@/hooks/useSession";
 import { PresenceBadge } from "@/components/PresenceBadge";
 import { formatCount } from "@/lib/neon";
 import { cropToSquare, uploadMedia, useMediaUrl } from "@/lib/media";
+import { ReelGrid } from "@/components/ReelGrid";
 
 function StatTile({
   icon: Icon,
@@ -36,6 +37,7 @@ export function ProfileView({ username }: { username: string }) {
   const { user } = useSession();
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
+  const [showProject, setShowProject] = useState(false);
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const counted = useRef(false);
@@ -104,6 +106,28 @@ export function ProfileView({ username }: { username: string }) {
         .eq("user_id", profileId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
+      return (data ?? []) as unknown as FeedPost[];
+    },
+  });
+
+  const savedPosts = useQuery({
+    queryKey: ["saved-posts", user?.id],
+    enabled: !!user && user.id === profileId,
+    queryFn: async () => {
+      const { data: rows, error } = await supabase
+        .from("saves")
+        .select("post_id")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const ids = (rows ?? []).map((r) => r.post_id);
+      if (ids.length === 0) return [] as FeedPost[];
+      const { data, error: e2 } = await supabase
+        .from("posts")
+        .select(POST_SELECT)
+        .in("id", ids)
+        .order("created_at", { ascending: false });
+      if (e2) throw e2;
       return (data ?? []) as unknown as FeedPost[];
     },
   });
@@ -329,24 +353,44 @@ export function ProfileView({ username }: { username: string }) {
           <PresenceBadge lastSeenAt={p.last_seen_at} />
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <StatTile icon={Users} label="Followers" value={formatCount(followers.data ?? 0)} />
-          <StatTile
-            icon={Eye}
-            label="Total Views"
-            value={formatCount(Number(p.total_views ?? 0))}
+        <button
+          type="button"
+          onClick={() => setShowProject((v) => !v)}
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/50 bg-primary/15 px-4 py-3 text-base font-black text-primary shadow-neon"
+        >
+          <BarChart3 className="h-5 w-5" /> مشاهدة المشروع
+          <ChevronDown
+            className={`h-4 w-4 transition-transform ${showProject ? "rotate-180" : ""}`}
           />
-          <StatTile
-            icon={Clock}
-            label="Watch Hours"
-            value={formatCount(Number(p.watch_hours ?? 0))}
-          />
-          <StatTile
-            icon={UserRound}
-            label="زوار الملف"
-            value={formatCount(Number(p.profile_views ?? 0))}
-          />
-        </div>
+        </button>
+
+        {showProject && (
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <StatTile icon={Users} label="Followers" value={formatCount(followers.data ?? 0)} />
+            <StatTile
+              icon={Eye}
+              label="Total Views"
+              value={formatCount(Number(p.total_views ?? 0))}
+            />
+            <StatTile
+              icon={Clock}
+              label="Watch Hours"
+              value={formatCount(Number(p.watch_hours ?? 0))}
+            />
+            <StatTile
+              icon={UserRound}
+              label="زوار الملف"
+              value={formatCount(Number(p.profile_views ?? 0))}
+            />
+            <StatTile
+              icon={Film}
+              label="ريلز مضمّنة"
+              value={formatCount(
+                (posts.data ?? []).filter((x) => !!x.video_url).length,
+              )}
+            />
+          </div>
+        )}
       </section>
 
       {profileStories.data && profileStories.data.length > 0 && (
@@ -367,11 +411,36 @@ export function ProfileView({ username }: { username: string }) {
         </section>
       )}
 
-      {posts.data?.map((post) => (
-        <PostCard key={post.id} post={post} currentUserId={user?.id} unlocked />
-      ))}
+      {(posts.data ?? []).some((x) => !!x.video_url) && (
+        <section dir="rtl" className="space-y-2">
+          <h2 className="px-1 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            الريلز
+          </h2>
+          <ReelGrid posts={(posts.data ?? []).filter((x) => !!x.video_url)} />
+        </section>
+      )}
+
+      {(posts.data ?? [])
+        .filter((x) => !x.video_url)
+        .map((post) => (
+          <PostCard key={post.id} post={post} currentUserId={user?.id} unlocked />
+        ))}
+
       {posts.data?.length === 0 && (
-        <p className="text-sm text-muted-foreground">No reels yet.</p>
+        <p className="text-sm text-muted-foreground">لا ريلز بعد.</p>
+      )}
+
+      {isMe && (
+        <section dir="rtl" className="space-y-2">
+          <h2 className="flex items-center gap-2 px-1 text-sm font-bold text-primary">
+            <Bookmark className="h-4 w-4" /> العناصر المحفوظة
+          </h2>
+          {savedPosts.data && savedPosts.data.length > 0 ? (
+            <ReelGrid posts={savedPosts.data} />
+          ) : (
+            <p className="text-sm text-muted-foreground">لا عناصر محفوظة بعد.</p>
+          )}
+        </section>
       )}
     </div>
   );

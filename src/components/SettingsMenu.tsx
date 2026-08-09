@@ -20,7 +20,7 @@ export function SettingsMenu() {
           <Settings className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent dir="rtl" align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-48 text-right">
         <DropdownMenuLabel>الإعدادات</DropdownMenuLabel>
         <DropdownMenuItem onClick={toggle} className="gap-2 font-semibold">
           {mode === "dark" ? (

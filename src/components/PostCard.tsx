@@ -199,20 +199,15 @@ export function PostCard({
       {post.hashtags && <p className="mt-1 text-sm text-primary">{post.hashtags}</p>}
 
       {embed && (
-        <div
-          ref={wrapRef}
-          className="mt-3 overflow-hidden rounded-2xl border border-primary/20"
-        >
-          <iframe
-            src={embed}
-            title={post.content || "Reel"}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            loading="lazy"
-            className="aspect-[9/16] w-full"
-          />
-        </div>
+        <ReelFrame
+          postId={post.id}
+          embed={embed}
+          platform={platform}
+          title={post.content || "Reel"}
+          onVisibleTwoSeconds={() => void registerView()}
+        />
       )}
+
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <Reactions postId={post.id} currentUserId={currentUserId} />

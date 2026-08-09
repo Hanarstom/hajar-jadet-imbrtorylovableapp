@@ -90,30 +90,8 @@ export function PostCard({
     qc.invalidateQueries({ queryKey: ["views", post.id] });
   }
 
-  // +1 only after the reel stays genuinely on screen for 2 seconds.
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el || !embed) return;
-    let timer: number | undefined;
-    const io = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry && entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-          timer ??= window.setTimeout(() => void registerView(), 2000);
-        } else if (timer) {
-          window.clearTimeout(timer);
-          timer = undefined;
-        }
-      },
-      { threshold: [0, 0.6, 1] },
-    );
-    io.observe(el);
-    return () => {
-      io.disconnect();
-      if (timer) window.clearTimeout(timer);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [embed, post.id]);
+  // View counting is triggered by <ReelFrame /> after 2 real seconds on screen.
+
 
   const saved = useQuery({
     queryKey: ["saved", post.id, currentUserId],

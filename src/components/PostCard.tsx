@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Play,
@@ -19,6 +19,7 @@ import { Comments } from "@/components/Comments";
 import { Reactions } from "@/components/Reactions";
 import { PlatformIcon } from "@/components/PlatformIcons";
 import { PresenceBadge } from "@/components/PresenceBadge";
+import { ReelFrame } from "@/components/ReelFrame";
 import {
   detectPlatform,
   formatCount,

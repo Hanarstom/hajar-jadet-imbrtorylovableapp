@@ -171,6 +171,10 @@
 }
 
 @layer base {
+  html {
+    font-size: 17.5px;
+  }
+
   * {
     border-color: var(--color-border);
   }
@@ -184,6 +188,46 @@
     color: var(--color-foreground);
   }
 
+  html.light body {
+    background-color: oklch(0.98 0.005 150);
+    background-image:
+      radial-gradient(60% 40% at 50% -5%, oklch(0.75 0.18 148 / 0.16), transparent 70%),
+      radial-gradient(50% 35% at 100% 100%, oklch(0.75 0.18 148 / 0.1), transparent 70%);
+  }
+
+}
+
+/* Light mode palette (opt-in through the settings menu). */
+html.light {
+  --background: oklch(0.98 0.005 150);
+  --foreground: oklch(0.2 0.02 160);
+  --card: oklch(1 0 0 / 0.75);
+  --card-foreground: oklch(0.2 0.02 160);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.02 160);
+  --primary: oklch(0.62 0.2 148);
+  --primary-foreground: oklch(0.99 0.01 150);
+  --secondary: oklch(0.93 0.02 155 / 0.8);
+  --secondary-foreground: oklch(0.22 0.02 160);
+  --muted: oklch(0.93 0.015 155);
+  --muted-foreground: oklch(0.45 0.02 160);
+  --accent: oklch(0.62 0.2 148);
+  --accent-foreground: oklch(0.99 0.01 150);
+  --border: oklch(0.62 0.2 148 / 0.2);
+  --input: oklch(0.62 0.2 148 / 0.25);
+  --ring: oklch(0.62 0.2 148);
+  --neon-glow: 0 0 24px oklch(0.62 0.2 148 / 0.25);
+}
+
+html.light .glass {
+  background: linear-gradient(160deg, oklch(1 0 0 / 0.9), oklch(0.96 0.01 150 / 0.85));
+  border: 1px solid oklch(0.62 0.2 148 / 0.18);
+  box-shadow: 0 18px 40px -30px oklch(0.4 0.05 160 / 0.4);
+}
+
+html.light .neon-text {
+  color: oklch(0.5 0.19 148);
+  text-shadow: none;
 }
 
 @keyframes crown-bounce {

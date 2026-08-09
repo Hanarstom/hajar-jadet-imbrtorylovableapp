@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
-import { PostCard, POST_SELECT, type FeedPost } from "@/components/PostCard";
+import { POST_SELECT, type FeedPost } from "@/components/PostCard";
+import { ReelGrid } from "@/components/ReelGrid";
 import { SponsoredSlot } from "@/components/SponsoredSlot";
-import { useSession } from "@/hooks/useSession";
 
 export const Route = createFileRoute("/reels")({
   head: () => ({
@@ -28,7 +28,6 @@ export const Route = createFileRoute("/reels")({
 });
 
 function Reels() {
-  const { user } = useSession();
 
   const reels = useQuery({
     queryKey: ["reels"],
@@ -52,12 +51,15 @@ function Reels() {
         </h1>
         <SponsoredSlot id="reels-top" />
         {reels.isLoading && <p className="text-sm text-muted-foreground">Loading reels…</p>}
-        {reels.data?.map((post, i) => (
-          <div key={post.id} className="space-y-4">
-            <PostCard post={post} currentUserId={user?.id} unlocked />
-            {(i + 1) % 3 === 0 && <SponsoredSlot id={`reels-${i}`} />}
-          </div>
-        ))}
+        {Array.from(
+          { length: Math.ceil((reels.data?.length ?? 0) / 6) },
+          (_, chunk) => (
+            <div key={chunk} className="space-y-4">
+              <ReelGrid posts={(reels.data ?? []).slice(chunk * 6, chunk * 6 + 6)} />
+              <SponsoredSlot id={`reels-${chunk}`} />
+            </div>
+          ),
+        )}
         {reels.data?.length === 0 && (
           <p className="text-sm text-muted-foreground">No reels posted yet.</p>
         )}

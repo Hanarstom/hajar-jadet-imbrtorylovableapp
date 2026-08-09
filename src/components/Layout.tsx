@@ -8,6 +8,8 @@ import { useSession } from "@/hooks/useSession";
 import { BottomNav } from "@/components/BottomNav";
 import { usePresenceHeartbeat } from "@/hooks/usePresence";
 import { useNotificationAlerts } from "@/hooks/useNotificationAlerts";
+import { SettingsMenu } from "@/components/SettingsMenu";
+import { TextPostFab } from "@/components/TextPostFab";
 
 export const PLATFORM_NAME = "منصة حجر الجاديت الإمبراطوري";
 
@@ -29,7 +31,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="mx-auto max-w-2xl px-4 py-2.5">
           <div className="flex items-center gap-2">
             <Link to="/" className="min-w-0 flex-1">
-              <span className="neon-text block text-[13px] font-black leading-tight tracking-tight">
+              <span className="neon-text block text-[15px] font-black leading-tight tracking-tight">
                 {PLATFORM_NAME}
               </span>
             </Link>
@@ -38,6 +40,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Bell className="h-4 w-4 text-destructive" />
               </Link>
             </Button>
+            <SettingsMenu />
             <Button asChild variant="ghost" size="sm" className="rounded-full">
               <Link to="/earnings" aria-label="تحقيق الشروط">
                 <BarChart3 className="h-4 w-4" />
@@ -73,12 +76,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
               value={term}
               onChange={(e) => setTerm(e.target.value)}
               placeholder="ابحث في المنصة"
-              className="h-7 border-0 bg-transparent p-0 text-sm focus-visible:ring-0"
+              className="h-8 border-0 bg-transparent p-0 text-base focus-visible:ring-0"
             />
           </form>
         </div>
       </header>
       <main className="mx-auto max-w-2xl px-4 pb-28 pt-4">{children}</main>
+      <TextPostFab />
       <BottomNav />
     </div>
   );

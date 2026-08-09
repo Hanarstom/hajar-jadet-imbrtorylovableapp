@@ -38,7 +38,7 @@ function Reels() {
         .select(POST_SELECT)
         .not("video_url", "is", null)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(1000);
       if (error) throw error;
       return (data ?? []) as unknown as FeedPost[];
     },

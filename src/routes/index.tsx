@@ -59,7 +59,7 @@ function Feed() {
         .from("posts")
         .select(POST_SELECT)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(1000);
       if (error) throw error;
       return (data ?? []) as unknown as FeedPost[];
     },

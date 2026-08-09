@@ -27,7 +27,12 @@ export function ReelFrame({
   const [active, setActive] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
 
-  useEffect(() => subscribeReel((id) => setActive(id === postId)), [postId]);
+  useEffect(() => {
+    const unsub = subscribeReel((id) => setActive(id === postId));
+    return () => {
+      unsub();
+    };
+  }, [postId]);
 
   useEffect(() => {
     const el = wrapRef.current;

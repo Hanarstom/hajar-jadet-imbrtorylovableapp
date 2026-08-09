@@ -60,7 +60,6 @@ export function PostCard({
   const platform = detectPlatform(post.video_url);
   const embed = reelEmbedUrl(post.video_url);
   const viewed = useRef(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
 
   const views = useQuery({
     queryKey: ["views", post.id],

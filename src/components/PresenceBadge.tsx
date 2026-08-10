@@ -8,7 +8,7 @@ export function PresenceBadge({
   className = "",
 }: {
   lastSeenAt: string | null | undefined;
-  isOnline?: boolean;
+  isOnline?: boolean | undefined;
   className?: string;
 }) {
   const [, tick] = useState(0);

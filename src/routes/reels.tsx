@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
 import { POST_SELECT, type FeedPost } from "@/components/PostCard";
 import { ReelGrid } from "@/components/ReelGrid";
 import { SponsoredSlot } from "@/components/SponsoredSlot";
+import { InfiniteScrollTrigger } from "@/components/InfiniteScrollTrigger";
+
+const REELS_PAGE_SIZE = 9;
 
 export const Route = createFileRoute("/reels")({
   head: () => ({
@@ -29,19 +32,23 @@ export const Route = createFileRoute("/reels")({
 
 function Reels() {
 
-  const reels = useQuery({
+  const reels = useInfiniteQuery({
     queryKey: ["reels"],
-    queryFn: async () => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
       const { data, error } = await supabase
         .from("posts")
         .select(POST_SELECT)
         .not("video_url", "is", null)
         .order("created_at", { ascending: false })
-        .limit(1000);
+        .range(pageParam, pageParam + REELS_PAGE_SIZE - 1);
       if (error) throw error;
       return (data ?? []) as unknown as FeedPost[];
     },
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.length === REELS_PAGE_SIZE ? pages.length * REELS_PAGE_SIZE : undefined,
   });
+  const reelPosts = reels.data?.pages.flat() ?? [];
 
   return (
     <Layout>
@@ -52,17 +59,22 @@ function Reels() {
         <SponsoredSlot id="reels-top" />
         {reels.isLoading && <p className="text-sm text-muted-foreground">Loading reels…</p>}
         {Array.from(
-          { length: Math.ceil((reels.data?.length ?? 0) / 6) },
+          { length: Math.ceil(reelPosts.length / 6) },
           (_, chunk) => (
             <div key={chunk} className="space-y-4">
-              <ReelGrid posts={(reels.data ?? []).slice(chunk * 6, chunk * 6 + 6)} />
+              <ReelGrid posts={reelPosts.slice(chunk * 6, chunk * 6 + 6)} />
               <SponsoredSlot id={`reels-${chunk}`} />
             </div>
           ),
         )}
-        {reels.data?.length === 0 && (
+        {reelPosts.length === 0 && !reels.isLoading && (
           <p className="text-sm text-muted-foreground">No reels posted yet.</p>
         )}
+        <InfiniteScrollTrigger
+          hasMore={!!reels.hasNextPage}
+          loading={reels.isFetchingNextPage}
+          onLoadMore={() => void reels.fetchNextPage()}
+        />
       </div>
     </Layout>
   );

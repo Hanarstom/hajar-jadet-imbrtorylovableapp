@@ -65,14 +65,14 @@ export function isOnline(lastSeenAt: string | null | undefined, online?: boolean
   return online === true && Date.now() - new Date(lastSeenAt).getTime() < ONLINE_WINDOW_MS;
 }
 
-/** Arabic "left N ago" label. */
+/** Playful Arabic "left" label. */
 export function leftAgoLabel(lastSeenAt: string | null | undefined) {
-  if (!lastSeenAt) return "غادر الآن";
+  if (!lastSeenAt) return "غادرنا الان الله يسامحو😅";
   const elapsed = Date.now() - new Date(lastSeenAt).getTime();
-  if (elapsed < 60_000) return "غادر الآن";
+  if (elapsed < 120_000) return "غادرنا الان الله يسامحو😅";
   const mins = Math.floor(elapsed / 60_000);
-  if (mins < 60) return `يغادر · منذ ${mins} د`;
+  if (mins < 60) return `غادرنا منذ ${mins} د الله يسامحو😅`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `يغادر · منذ ${hours} س`;
-  return `يغادر · منذ ${Math.floor(hours / 24)} ي`;
+  if (hours < 24) return `غادرنا منذ ${hours} س الله يسامحو😅`;
+  return `غادرنا منذ ${Math.floor(hours / 24)} ي الله يسامحو😅`;
 }

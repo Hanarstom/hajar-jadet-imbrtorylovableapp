@@ -10,6 +10,7 @@ import { usePresenceHeartbeat } from "@/hooks/usePresence";
 import { useNotificationAlerts } from "@/hooks/useNotificationAlerts";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { TextPostFab } from "@/components/TextPostFab";
+import { Mascot } from "@/components/Mascot";
 
 export const PLATFORM_NAME = "منصة حجر الجاديت الإمبراطوري";
 

@@ -22,12 +22,12 @@ export function PresenceBadge({
   return (
     <span
       dir="rtl"
-      className={`inline-flex items-center gap-2 text-sm font-black ${online ? "text-blue-700" : "text-red-800"} ${className}`}
+      className={`inline-flex items-center gap-2 text-base font-black leading-tight ${online ? "text-blue-500" : "text-red-600"} ${className}`}
     >
       <span
-        className={`inline-block h-3 w-3 rounded-full ${online ? "animate-pulse bg-blue-700" : "bg-red-800"}`}
+        className={`inline-block h-3.5 w-3.5 shrink-0 rounded-full ${online ? "animate-pulse bg-blue-500 shadow-[0_0_10px_3px_rgba(59,130,246,0.9)]" : "bg-red-600 shadow-[0_0_8px_2px_rgba(220,38,38,0.7)]"}`}
       />
-      {online ? "نشط الآن" : leftAgoLabel(lastSeenAt)}
+      {online ? "اي ها هلق صرت نشيط وانت عيني🥲" : leftAgoLabel(lastSeenAt)}
     </span>
   );
 }

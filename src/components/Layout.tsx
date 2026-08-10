@@ -10,6 +10,7 @@ import { usePresenceHeartbeat } from "@/hooks/usePresence";
 import { useNotificationAlerts } from "@/hooks/useNotificationAlerts";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { TextPostFab } from "@/components/TextPostFab";
+import { Mascot } from "@/components/Mascot";
 
 export const PLATFORM_NAME = "منصة حجر الجاديت الإمبراطوري";
 
@@ -82,6 +83,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="mx-auto max-w-2xl px-4 pb-28 pt-4">{children}</main>
+      <Mascot />
       <TextPostFab />
       <BottomNav />
     </div>

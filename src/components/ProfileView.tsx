@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Eye, Users, Clock, Camera, Pencil, UserRound, Film, Bookmark, BarChart3, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,9 @@ import { PresenceBadge } from "@/components/PresenceBadge";
 import { formatCount } from "@/lib/neon";
 import { cropToSquare, uploadMedia, useMediaUrl } from "@/lib/media";
 import { ReelGrid } from "@/components/ReelGrid";
+import { InfiniteScrollTrigger } from "@/components/InfiniteScrollTrigger";
+
+const PROFILE_PAGE_SIZE = 9;
 
 function StatTile({
   icon: Icon,
@@ -48,7 +51,7 @@ export function ProfileView({ username }: { username: string }) {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views, last_seen_at",
+          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views, last_seen_at, is_online",
         )
         .eq("username", username)
         .maybeSingle();
@@ -58,6 +61,21 @@ export function ProfileView({ username }: { username: string }) {
   });
 
   const profileId = profile.data?.id;
+  useEffect(() => {
+    if (!profileId) return;
+    const channel = supabase
+      .channel(`profile-presence-${profileId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${profileId}` },
+        () => void qc.invalidateQueries({ queryKey: ["profile", username] }),
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [profileId, qc, username]);
+
   const isMe = !!user && user.id === profileId;
 
   useEffect(() => {
@@ -96,17 +114,36 @@ export function ProfileView({ username }: { username: string }) {
     },
   });
 
-  const posts = useQuery({
+  const posts = useInfiniteQuery({
     queryKey: ["profile-posts", profileId],
     enabled: !!profileId,
-    queryFn: async () => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
       const { data, error } = await supabase
         .from("posts")
         .select(POST_SELECT)
         .eq("user_id", profileId!)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(pageParam, pageParam + PROFILE_PAGE_SIZE - 1);
       if (error) throw error;
       return (data ?? []) as unknown as FeedPost[];
+    },
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.length === PROFILE_PAGE_SIZE ? pages.length * PROFILE_PAGE_SIZE : undefined,
+  });
+  const profilePosts = posts.data?.pages.flat() ?? [];
+
+  const reelCount = useQuery({
+    queryKey: ["profile-reel-count", profileId],
+    enabled: !!profileId,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("posts")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", profileId!)
+        .not("video_url", "is", null);
+      if (error) throw error;
+      return count ?? 0;
     },
   });
 
@@ -350,7 +387,7 @@ export function ProfileView({ username }: { username: string }) {
         )}
 
         <div className="mt-1 flex justify-center">
-          <PresenceBadge lastSeenAt={p.last_seen_at} />
+          <PresenceBadge lastSeenAt={p.last_seen_at} isOnline={p.is_online} />
         </div>
 
         <button
@@ -386,7 +423,7 @@ export function ProfileView({ username }: { username: string }) {
               icon={Film}
               label="ريلز مضمّنة"
               value={formatCount(
-                (posts.data ?? []).filter((x) => !!x.video_url).length,
+                reelCount.data ?? 0,
               )}
             />
           </div>
@@ -411,24 +448,30 @@ export function ProfileView({ username }: { username: string }) {
         </section>
       )}
 
-      {(posts.data ?? []).some((x) => !!x.video_url) && (
+      {profilePosts.some((x) => !!x.video_url) && (
         <section dir="rtl" className="space-y-2">
           <h2 className="px-1 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
             الريلز
           </h2>
-          <ReelGrid posts={(posts.data ?? []).filter((x) => !!x.video_url)} />
+          <ReelGrid posts={profilePosts.filter((x) => !!x.video_url)} />
         </section>
       )}
 
-      {(posts.data ?? [])
+      {profilePosts
         .filter((x) => !x.video_url)
         .map((post) => (
           <PostCard key={post.id} post={post} currentUserId={user?.id} unlocked />
         ))}
 
-      {posts.data?.length === 0 && (
+      {profilePosts.length === 0 && !posts.isLoading && (
         <p className="text-sm text-muted-foreground">لا ريلز بعد.</p>
       )}
+
+      <InfiniteScrollTrigger
+        hasMore={!!posts.hasNextPage}
+        loading={posts.isFetchingNextPage}
+        onLoadMore={() => void posts.fetchNextPage()}
+      />
 
       {isMe && (
         <section dir="rtl" className="space-y-2">

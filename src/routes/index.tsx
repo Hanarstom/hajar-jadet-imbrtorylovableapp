@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
 import { Avatar } from "@/components/Avatar";
@@ -12,6 +12,9 @@ import { Stories } from "@/components/Stories";
 import { RollingEmoji } from "@/components/RollingEmoji";
 import { PlatformAds } from "@/components/PlatformAds";
 import { useSession } from "@/hooks/useSession";
+import { InfiniteScrollTrigger } from "@/components/InfiniteScrollTrigger";
+
+const FEED_PAGE_SIZE = 8;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,18 +55,22 @@ function Feed() {
     },
   });
 
-  const feed = useQuery({
+  const feed = useInfiniteQuery({
     queryKey: ["feed"],
-    queryFn: async () => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
       const { data, error } = await supabase
         .from("posts")
         .select(POST_SELECT)
         .order("created_at", { ascending: false })
-        .limit(1000);
+        .range(pageParam, pageParam + FEED_PAGE_SIZE - 1);
       if (error) throw error;
       return (data ?? []) as unknown as FeedPost[];
     },
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.length === FEED_PAGE_SIZE ? pages.length * FEED_PAGE_SIZE : undefined,
   });
+  const feedPosts = feed.data?.pages.flat() ?? [];
 
   return (
     <Layout>
@@ -111,15 +118,20 @@ function Feed() {
         <SponsoredSlot id="feed-top" />
 
         {feed.isLoading && <p className="text-sm text-muted-foreground">جارٍ تحميل الريلز…</p>}
-        {feed.data?.map((post, i) => (
+        {feedPosts.map((post, i) => (
           <div key={post.id} className="space-y-4">
             <PostCard post={post} currentUserId={user?.id} />
             {(i + 1) % 3 === 0 && <SponsoredSlot id={`feed-${i}`} />}
           </div>
         ))}
-        {feed.data?.length === 0 && (
+        {feedPosts.length === 0 && !feed.isLoading && (
           <p className="text-sm text-muted-foreground">لا ريلز بعد — كن الأول.</p>
         )}
+        <InfiniteScrollTrigger
+          hasMore={!!feed.hasNextPage}
+          loading={feed.isFetchingNextPage}
+          onLoadMore={() => void feed.fetchNextPage()}
+        />
       </div>
     </Layout>
   );

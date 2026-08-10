@@ -83,6 +83,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="mx-auto max-w-2xl px-4 pb-28 pt-4">{children}</main>
+      <Mascot />
       <TextPostFab />
       <BottomNav />
     </div>

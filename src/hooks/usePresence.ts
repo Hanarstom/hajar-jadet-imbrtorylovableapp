@@ -1,10 +1,12 @@
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
 
 /** Marks the signed-in user as active while the app is open. */
 export function usePresenceHeartbeat() {
   const { user } = useSession();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!user) return;
@@ -34,6 +36,26 @@ export function usePresenceHeartbeat() {
       away();
     };
   }, [user]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("live-profile-presence")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles" },
+        () => {
+          void queryClient.invalidateQueries({ queryKey: ["feed"] });
+          void queryClient.invalidateQueries({ queryKey: ["reels"] });
+          void queryClient.invalidateQueries({ queryKey: ["profile"] });
+          void queryClient.invalidateQueries({ queryKey: ["profile-posts"] });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 }
 
 export const ONLINE_WINDOW_MS = 45 * 1000;

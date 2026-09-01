@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as EarningsRouteImport } from './routes/earnings'
 import { Route as FriendsRouteImport } from './routes/friends'
+import { Route as InviteRouteImport } from './routes/invite'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -38,6 +39,11 @@ const EarningsRoute = EarningsRouteImport.update({
 const FriendsRoute = FriendsRouteImport.update({
   id: '/friends',
   path: '/friends',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteRoute = InviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/earnings': typeof EarningsRoute
   '/friends': typeof FriendsRoute
+  '/invite': typeof InviteRoute
   '/notifications': typeof NotificationsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/earnings': typeof EarningsRoute
   '/friends': typeof FriendsRoute
+  '/invite': typeof InviteRoute
   '/notifications': typeof NotificationsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/earnings': typeof EarningsRoute
   '/friends': typeof FriendsRoute
+  '/invite': typeof InviteRoute
   '/notifications': typeof NotificationsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/earnings'
     | '/friends'
+    | '/invite'
     | '/notifications'
     | '/privacy'
     | '/profile'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/earnings'
     | '/friends'
+    | '/invite'
     | '/notifications'
     | '/privacy'
     | '/profile'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/earnings'
     | '/friends'
+    | '/invite'
     | '/notifications'
     | '/privacy'
     | '/profile'
@@ -152,6 +164,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   EarningsRoute: typeof EarningsRoute
   FriendsRoute: typeof FriendsRoute
+  InviteRoute: typeof InviteRoute
   NotificationsRoute: typeof NotificationsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
@@ -188,6 +201,13 @@ declare module '@tanstack/react-router' {
       path: '/friends'
       fullPath: '/friends'
       preLoaderRoute: typeof FriendsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof InviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -240,6 +260,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   EarningsRoute: EarningsRoute,
   FriendsRoute: FriendsRoute,
+  InviteRoute: InviteRoute,
   NotificationsRoute: NotificationsRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,

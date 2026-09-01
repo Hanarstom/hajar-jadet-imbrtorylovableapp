@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -62,6 +62,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      daily_activity: {
+        Row: {
+          day: string
+          reels_posted: number
+          user_id: string
+          watch_seconds: number
+        }
+        Insert: {
+          day?: string
+          reels_posted?: number
+          user_id: string
+          watch_seconds?: number
+        }
+        Update: {
+          day?: string
+          reels_posted?: number
+          user_id?: string
+          watch_seconds?: number
+        }
+        Relationships: []
       }
       follows: {
         Row: {
@@ -228,39 +249,51 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          balance: number
           bio: string | null
+          country_code: string | null
           created_at: string
           display_name: string
           id: string
           is_online: boolean
           last_seen_at: string
           profile_views: number
+          referral_code: string | null
+          referred_by: string | null
           total_views: number
           username: string
           watch_hours: number
         }
         Insert: {
           avatar_url?: string | null
+          balance?: number
           bio?: string | null
+          country_code?: string | null
           created_at?: string
           display_name?: string
           id: string
           is_online?: boolean
           last_seen_at?: string
           profile_views?: number
+          referral_code?: string | null
+          referred_by?: string | null
           total_views?: number
           username: string
           watch_hours?: number
         }
         Update: {
           avatar_url?: string | null
+          balance?: number
           bio?: string | null
+          country_code?: string | null
           created_at?: string
           display_name?: string
           id?: string
           is_online?: boolean
           last_seen_at?: string
           profile_views?: number
+          referral_code?: string | null
+          referred_by?: string | null
           total_views?: number
           username?: string
           watch_hours?: number
@@ -298,6 +331,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referrals: {
+        Row: {
+          activity_reward_paid: boolean
+          created_at: string
+          device_fingerprint: string | null
+          id: string
+          invited_id: string
+          inviter_id: string
+          signup_reward_paid: boolean
+          status: string
+        }
+        Insert: {
+          activity_reward_paid?: boolean
+          created_at?: string
+          device_fingerprint?: string | null
+          id?: string
+          invited_id: string
+          inviter_id: string
+          signup_reward_paid?: boolean
+          status?: string
+        }
+        Update: {
+          activity_reward_paid?: boolean
+          created_at?: string
+          device_fingerprint?: string | null
+          id?: string
+          invited_id?: string
+          inviter_id?: string
+          signup_reward_paid?: boolean
+          status?: string
+        }
+        Relationships: []
       }
       saves: {
         Row: {
@@ -360,11 +426,69 @@ export type Database = {
           },
         ]
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      withdrawals: {
+        Row: {
+          amount: number
+          binance_id: string
+          created_at: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          binance_id: string
+          created_at?: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          binance_id?: string
+          created_at?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      evaluate_referral_activity: {
+        Args: { _user: string }
+        Returns: undefined
+      }
       leaderboard_24h: {
         Args: never
         Returns: {
@@ -379,10 +503,15 @@ export type Database = {
         Args: { _meta: string; _post_id: string; _type: string }
         Returns: undefined
       }
+      record_watch_time: { Args: { _seconds: number }; Returns: undefined }
       register_post_view: { Args: { _post_id: string }; Returns: undefined }
       register_profile_view: {
         Args: { _profile_id: string }
         Returns: undefined
+      }
+      request_withdrawal: {
+        Args: { _amount: number; _binance_id: string }
+        Returns: string
       }
       touch_presence: { Args: never; Returns: undefined }
     }

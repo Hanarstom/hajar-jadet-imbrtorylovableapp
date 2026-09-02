@@ -58,22 +58,23 @@ export function usePresenceHeartbeat() {
   }, [queryClient]);
 }
 
-export const ONLINE_WINDOW_MS = 45 * 1000;
+export const ONLINE_WINDOW_MS = 30 * 1000;
 
 export function isOnline(lastSeenAt: string | null | undefined, online?: boolean) {
   if (!lastSeenAt) return false;
   return online === true && Date.now() - new Date(lastSeenAt).getTime() < ONLINE_WINDOW_MS;
 }
 
-/** Playful Arabic "left" label. */
+/** Arabic "left" label with precise elapsed time. */
 export function leftAgoLabel(lastSeenAt: string | null | undefined) {
-  const base = "غادرنا الآن الله يسامحه 😂 🔴";
+  const base = "غادر الآن";
   if (!lastSeenAt) return base;
   const elapsed = Date.now() - new Date(lastSeenAt).getTime();
-  if (elapsed < 120_000) return base;
+  if (elapsed < 60_000) return base;
   const mins = Math.floor(elapsed / 60_000);
-  if (mins < 60) return `غادرنا منذ ${mins} د الله يسامحه 😂 🔴`;
+  if (mins < 60) return `غادر منذ ${mins} د`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `غادرنا منذ ${hours} س الله يسامحه 😂 🔴`;
-  return `غادرنا منذ ${Math.floor(hours / 24)} ي الله يسامحه 😂 🔴`;
+  if (hours < 24) return `غادر منذ ${hours} س`;
+  return `غادر منذ ${Math.floor(hours / 24)} ي`;
 }
+

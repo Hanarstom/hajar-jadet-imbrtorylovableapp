@@ -60,7 +60,9 @@ export function BottomNav() {
                   </span>
                 )}
               </span>
-              <span className="w-full truncate text-center text-[11px] font-semibold leading-none">
+              <span
+                className={`w-full truncate text-center text-[11px] leading-none ${to === "/invite" ? "font-black text-emerald-400" : "font-semibold"}`}
+              >
                 {label}
               </span>
             </Link>

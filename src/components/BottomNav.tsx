@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Film, Users, Bell, User } from "lucide-react";
+import { Home, Film, Users, Bell, User, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
 
 const TABS = [
   { to: "/", label: "الرئيسية", Icon: Home },
   { to: "/reels", label: "الريلز", Icon: Film },
+  { to: "/invite", label: "ادعُ واكسب", Icon: DollarSign },
   { to: "/friends", label: "الأصدقاء", Icon: Users },
   { to: "/notifications", label: "الإشعارات", Icon: Bell },
   { to: "/profile", label: "البروفايل", Icon: User },
@@ -35,7 +36,7 @@ export function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-30 border-t border-primary/15 bg-background/80 backdrop-blur-xl"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto grid max-w-2xl grid-cols-5">
+      <ul className="mx-auto grid max-w-2xl grid-cols-6">
         {TABS.map(({ to, label, Icon }) => (
           <li key={to} className="min-w-0">
             <Link
@@ -48,7 +49,9 @@ export function BottomNav() {
                   className={`h-5 w-5 shrink-0 transition-transform group-hover:-translate-y-0.5 group-data-[status=active]:drop-shadow-[0_0_10px_var(--primary)] ${
                     to === "/notifications" && (unread.data ?? 0) > 0
                       ? "text-destructive"
-                      : ""
+                      : to === "/invite"
+                        ? "text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.9)]"
+                        : ""
                   }`}
                 />
                 {to === "/notifications" && (unread.data ?? 0) > 0 && (
@@ -57,7 +60,9 @@ export function BottomNav() {
                   </span>
                 )}
               </span>
-              <span className="w-full truncate text-center text-[11px] font-semibold leading-none">
+              <span
+                className={`w-full truncate text-center text-[11px] leading-none ${to === "/invite" ? "font-black text-emerald-400" : "font-semibold"}`}
+              >
                 {label}
               </span>
             </Link>

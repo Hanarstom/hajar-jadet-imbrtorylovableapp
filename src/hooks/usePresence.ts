@@ -67,12 +67,13 @@ export function isOnline(lastSeenAt: string | null | undefined, online?: boolean
 
 /** Playful Arabic "left" label. */
 export function leftAgoLabel(lastSeenAt: string | null | undefined) {
-  if (!lastSeenAt) return "غادرنا الان الله يسامحو😅";
+  const base = "غادرنا الآن الله يسامحه 😂 🔴";
+  if (!lastSeenAt) return base;
   const elapsed = Date.now() - new Date(lastSeenAt).getTime();
-  if (elapsed < 120_000) return "غادرنا الان الله يسامحو😅";
+  if (elapsed < 120_000) return base;
   const mins = Math.floor(elapsed / 60_000);
-  if (mins < 60) return `غادرنا منذ ${mins} د الله يسامحو😅`;
+  if (mins < 60) return `غادرنا منذ ${mins} د الله يسامحه 😂 🔴`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `غادرنا منذ ${hours} س الله يسامحو😅`;
-  return `غادرنا منذ ${Math.floor(hours / 24)} ي الله يسامحو😅`;
+  if (hours < 24) return `غادرنا منذ ${hours} س الله يسامحه 😂 🔴`;
+  return `غادرنا منذ ${Math.floor(hours / 24)} ي الله يسامحه 😂 🔴`;
 }

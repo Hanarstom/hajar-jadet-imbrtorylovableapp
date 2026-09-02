@@ -4,7 +4,7 @@
  */
 const KEY = "neon_popunder_state";
 const MAX_PER_DAY = 2;
-const MIN_GAP_MS = 12 * 60 * 60 * 1000;
+const MIN_GAP_MS = 5 * 60 * 60 * 1000;
 
 const POPUNDER_SRC =
   "https://pl30756663.effectivecpmnetwork.com/6d/aa/71/6daa712c225833100012ea546c0ec3e3.js";

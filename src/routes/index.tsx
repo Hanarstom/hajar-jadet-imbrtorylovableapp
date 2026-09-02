@@ -121,7 +121,7 @@ function Feed() {
         {feedPosts.map((post, i) => (
           <div key={post.id} className="space-y-4">
             <PostCard post={post} currentUserId={user?.id} />
-            {(i + 1) % 3 === 0 && <SponsoredSlot id={`feed-${i}`} />}
+            <SponsoredSlot id={`feed-${i}`} />
           </div>
         ))}
         {feedPosts.length === 0 && !feed.isLoading && (

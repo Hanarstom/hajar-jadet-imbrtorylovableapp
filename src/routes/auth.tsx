@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Layout } from "@/components/Layout";
+import { COUNTRIES } from "@/lib/countries";
+import { captureReferralFromUrl, clearReferralCode, deviceFingerprint, storedReferralCode } from "@/lib/fingerprint";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -32,19 +34,31 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [country, setCountry] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    captureReferralFromUrl();
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
       if (mode === "signup") {
+        if (!country) throw new Error("اختر بلدك أولاً");
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { username: username.trim().toLowerCase(), display_name: username.trim() },
+            data: {
+              username: username.trim().toLowerCase(),
+              display_name: username.trim(),
+              country_code: country,
+              referral_code: storedReferralCode(),
+              device_fingerprint: deviceFingerprint(),
+            },
           },
         });
         if (error) throw error;
@@ -55,6 +69,7 @@ function AuthPage() {
           });
           if (signInError) throw signInError;
         }
+        clearReferralCode();
         toast.success("Welcome to Neon");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -86,6 +101,25 @@ function AuthPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 maxLength={24}
               />
+            </div>
+          )}
+          {mode === "signup" && (
+            <div dir="rtl">
+              <Label htmlFor="country">البلد (إلزامي)</Label>
+              <select
+                id="country"
+                required
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="mt-1 h-11 w-full rounded-md border border-input bg-background px-3 text-base"
+              >
+                <option value="">اختر بلدك…</option>
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.flag} {c.name}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
           <div>

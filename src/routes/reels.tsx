@@ -58,15 +58,12 @@ function Reels() {
         </h1>
         <SponsoredSlot id="reels-top" />
         {reels.isLoading && <p className="text-sm text-muted-foreground">Loading reels…</p>}
-        {Array.from(
-          { length: Math.ceil(reelPosts.length / 6) },
-          (_, chunk) => (
-            <div key={chunk} className="space-y-4">
-              <ReelGrid posts={reelPosts.slice(chunk * 6, chunk * 6 + 6)} />
-              <SponsoredSlot id={`reels-${chunk}`} />
-            </div>
-          ),
-        )}
+        {Array.from({ length: Math.ceil(reelPosts.length / 3) }, (_, chunk) => (
+          <div key={chunk} className="space-y-4">
+            <ReelGrid posts={reelPosts.slice(chunk * 3, chunk * 3 + 3)} />
+            <SponsoredSlot id={`reels-${chunk}`} />
+          </div>
+        ))}
         {reelPosts.length === 0 && !reels.isLoading && (
           <p className="text-sm text-muted-foreground">No reels posted yet.</p>
         )}

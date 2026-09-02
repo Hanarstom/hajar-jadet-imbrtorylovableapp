@@ -28,7 +28,7 @@ import {
 } from "@/lib/neon";
 
 export const POST_SELECT =
-  "id, user_id, content, hashtags, video_url, platform, views_count, created_at, profiles(username, display_name, avatar_url, last_seen_at, is_online)";
+  "id, user_id, content, hashtags, video_url, platform, views_count, created_at, profiles(username, display_name, avatar_url, last_seen_at, is_online, country_code)";
 
 export type FeedPost = {
   id: string;
@@ -40,7 +40,14 @@ export type FeedPost = {
   views_count?: number | null;
   created_at: string;
   profiles:
-    | { username: string; display_name: string; avatar_url: string | null; last_seen_at?: string | null; is_online?: boolean }
+    | {
+        username: string;
+        display_name: string;
+        avatar_url: string | null;
+        last_seen_at?: string | null;
+        is_online?: boolean;
+        country_code?: string | null;
+      }
     | null;
 };
 

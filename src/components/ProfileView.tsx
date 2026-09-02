@@ -13,6 +13,7 @@ import { formatCount } from "@/lib/neon";
 import { cropToSquare, uploadMedia, useMediaUrl } from "@/lib/media";
 import { ReelGrid } from "@/components/ReelGrid";
 import { InfiniteScrollTrigger } from "@/components/InfiniteScrollTrigger";
+import { countryFlag } from "@/lib/countries";
 
 const PROFILE_PAGE_SIZE = 9;
 
@@ -51,7 +52,7 @@ export function ProfileView({ username }: { username: string }) {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views, last_seen_at, is_online",
+          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views, last_seen_at, is_online, country_code",
         )
         .eq("username", username)
         .maybeSingle();
@@ -346,6 +347,7 @@ export function ProfileView({ username }: { username: string }) {
         ) : (
           <>
             <h1 className="mt-4 flex items-center justify-center gap-2 truncate text-2xl font-black tracking-tight">
+              <span>{countryFlag(p.country_code)}</span>
               {p.display_name || p.username}
               {user && user.id !== p.id && (
                 <Button

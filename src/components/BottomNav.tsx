@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Film, Users, Bell, User } from "lucide-react";
+import { Home, Film, Users, Bell, User, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
 
 const TABS = [
   { to: "/", label: "الرئيسية", Icon: Home },
   { to: "/reels", label: "الريلز", Icon: Film },
+  { to: "/invite", label: "ادعُ واكسب", Icon: DollarSign },
   { to: "/friends", label: "الأصدقاء", Icon: Users },
   { to: "/notifications", label: "الإشعارات", Icon: Bell },
   { to: "/profile", label: "البروفايل", Icon: User },

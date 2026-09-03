@@ -254,14 +254,18 @@ export type Database = {
           country_code: string | null
           created_at: string
           display_name: string
+          gender: string | null
           id: string
           is_online: boolean
+          is_verified: boolean
           last_seen_at: string
           profile_views: number
+          reels_watched: number
           referral_code: string | null
           referred_by: string | null
           total_views: number
           username: string
+          verification_status: string
           watch_hours: number
         }
         Insert: {
@@ -271,14 +275,18 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           display_name?: string
+          gender?: string | null
           id: string
           is_online?: boolean
+          is_verified?: boolean
           last_seen_at?: string
           profile_views?: number
+          reels_watched?: number
           referral_code?: string | null
           referred_by?: string | null
           total_views?: number
           username: string
+          verification_status?: string
           watch_hours?: number
         }
         Update: {
@@ -288,14 +296,18 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           display_name?: string
+          gender?: string | null
           id?: string
           is_online?: boolean
+          is_verified?: boolean
           last_seen_at?: string
           profile_views?: number
+          reels_watched?: number
           referral_code?: string | null
           referred_by?: string | null
           total_views?: number
           username?: string
+          verification_status?: string
           watch_hours?: number
         }
         Relationships: []
@@ -325,6 +337,32 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reel_watches: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_watches_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
@@ -426,6 +464,33 @@ export type Database = {
           },
         ]
       }
+      verifications: {
+        Row: {
+          created_at: string
+          gender: string
+          photo_path: string
+          reviewed_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          gender: string
+          photo_path: string
+          reviewed_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          gender?: string
+          photo_path?: string
+          reviewed_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wallet_transactions: {
         Row: {
           amount: number
@@ -485,6 +550,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_pending_verifications: {
+        Args: { _pass: string }
+        Returns: {
+          created_at: string
+          display_name: string
+          gender: string
+          photo_path: string
+          user_id: string
+          username: string
+        }[]
+      }
+      admin_review_verification: {
+        Args: { _approve: boolean; _pass: string; _user: string }
+        Returns: string
+      }
       evaluate_referral_activity: {
         Args: { _user: string }
         Returns: undefined
@@ -509,8 +589,13 @@ export type Database = {
         Args: { _profile_id: string }
         Returns: undefined
       }
+      register_reel_watch: { Args: { _post_id: string }; Returns: undefined }
       request_withdrawal: {
         Args: { _amount: number; _binance_id: string }
+        Returns: string
+      }
+      submit_verification: {
+        Args: { _gender: string; _photo_path: string }
         Returns: string
       }
       touch_presence: { Args: never; Returns: undefined }
@@ -532,12 +617,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -561,11 +646,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -586,11 +671,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -611,11 +696,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -628,11 +713,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

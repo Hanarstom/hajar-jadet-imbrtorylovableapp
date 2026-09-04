@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Layout } from "@/components/Layout";
+import { PendingVerifications } from "@/components/PendingVerifications";
 import { useSession } from "@/hooks/useSession";
+
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -175,7 +177,10 @@ function PrivacyAdmin() {
             </li>
           ))}
         </ul>
+
+        <PendingVerifications pass={GATE} />
       </div>
+
     </Layout>
   );
 }

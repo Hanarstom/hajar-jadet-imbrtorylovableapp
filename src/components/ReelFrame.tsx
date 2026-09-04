@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Play, RotateCcw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { claimReel, releaseReel, subscribeReel } from "@/lib/videoBus";
 import type { Platform } from "@/lib/neon";
+
 
 /**
  * Single-audio reel player.

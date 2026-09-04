@@ -14,6 +14,10 @@ import { cropToSquare, uploadMedia, useMediaUrl } from "@/lib/media";
 import { ReelGrid } from "@/components/ReelGrid";
 import { InfiniteScrollTrigger } from "@/components/InfiniteScrollTrigger";
 import { countryFlag } from "@/lib/countries";
+import { VerifiedBadge, verifiedNameClass } from "@/components/VerifiedName";
+import { VerifyPanel } from "@/components/VerifyPanel";
+import { ActivityMeter } from "@/components/ActivityMeter";
+
 
 const PROFILE_PAGE_SIZE = 9;
 
@@ -52,8 +56,9 @@ export function ProfileView({ username }: { username: string }) {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views, last_seen_at, is_online, country_code",
+          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views, last_seen_at, is_online, country_code, gender, is_verified, verification_status, reels_watched",
         )
+
         .eq("username", username)
         .maybeSingle();
       if (error) throw error;

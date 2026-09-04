@@ -14,10 +14,11 @@ export function VerifiedBadge({
   isVerified,
   withLabel = false,
 }: {
-  gender?: string | null;
-  isVerified?: boolean | null;
+  gender?: string | null | undefined;
+  isVerified?: boolean | null | undefined;
   withLabel?: boolean;
 }) {
+
   if (!isVerified) return null;
   const color = gender === "female" ? "text-pink-400" : "text-sky-400";
   return (

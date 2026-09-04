@@ -388,6 +388,11 @@ export function ProfileView({ username }: { username: string }) {
               )}
             </h1>
             <p className="text-sm text-primary/80">@{p.username}</p>
+            {p.is_verified && (
+              <p className="mt-1 flex justify-center">
+                <VerifiedBadge gender={p.gender} isVerified withLabel />
+              </p>
+            )}
             {p.bio && (
               <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
                 {p.bio}
@@ -399,6 +404,16 @@ export function ProfileView({ username }: { username: string }) {
         <div className="mt-1 flex justify-center">
           <PresenceBadge lastSeenAt={p.last_seen_at} isOnline={p.is_online} />
         </div>
+
+        {isMe && (
+          <>
+            {!p.is_verified && (
+              <VerifyPanel userId={p.id} status={p.verification_status} />
+            )}
+            <ActivityMeter watched={Number(p.reels_watched ?? 0)} />
+          </>
+        )}
+
 
         <button
           type="button"

@@ -28,6 +28,7 @@ export function ReelFrame({
   const wrapRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
+  const counted = useRef(false);
 
   useEffect(() => {
     const unsub = subscribeReel((id) => setActive(id === postId));
@@ -40,6 +41,7 @@ export function ReelFrame({
     const el = wrapRef.current;
     if (!el) return;
     let timer: number | undefined;
+    let watchTimer: number | undefined;
     const io = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
@@ -48,11 +50,22 @@ export function ReelFrame({
           if (onVisibleTwoSeconds) {
             timer ??= window.setTimeout(() => onVisibleTwoSeconds(), 2000);
           }
+          // Real 3 seconds inside the reel before it counts towards the activity meter.
+          if (!counted.current) {
+            watchTimer ??= window.setTimeout(() => {
+              counted.current = true;
+              void supabase.rpc("register_reel_watch", { _post_id: postId });
+            }, 3000);
+          }
         } else {
           releaseReel(postId);
           if (timer) {
             window.clearTimeout(timer);
             timer = undefined;
+          }
+          if (watchTimer) {
+            window.clearTimeout(watchTimer);
+            watchTimer = undefined;
           }
         }
       },
@@ -63,9 +76,11 @@ export function ReelFrame({
       io.disconnect();
       releaseReel(postId);
       if (timer) window.clearTimeout(timer);
+      if (watchTimer) window.clearTimeout(watchTimer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId]);
+
 
   // Instagram/TikTok embeds sometimes post an "ended" style message — reset on it.
   useEffect(() => {

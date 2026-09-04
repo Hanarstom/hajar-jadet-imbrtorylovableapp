@@ -14,6 +14,10 @@ import { cropToSquare, uploadMedia, useMediaUrl } from "@/lib/media";
 import { ReelGrid } from "@/components/ReelGrid";
 import { InfiniteScrollTrigger } from "@/components/InfiniteScrollTrigger";
 import { countryFlag } from "@/lib/countries";
+import { VerifiedBadge, verifiedNameClass } from "@/components/VerifiedName";
+import { VerifyPanel } from "@/components/VerifyPanel";
+import { ActivityMeter } from "@/components/ActivityMeter";
+
 
 const PROFILE_PAGE_SIZE = 9;
 
@@ -52,8 +56,9 @@ export function ProfileView({ username }: { username: string }) {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views, last_seen_at, is_online, country_code",
+          "id, username, display_name, avatar_url, bio, total_views, watch_hours, profile_views, last_seen_at, is_online, country_code, gender, is_verified, verification_status, reels_watched",
         )
+
         .eq("username", username)
         .maybeSingle();
       if (error) throw error;
@@ -348,7 +353,10 @@ export function ProfileView({ username }: { username: string }) {
           <>
             <h1 className="mt-4 flex items-center justify-center gap-2 truncate text-2xl font-black tracking-tight">
               <span>{countryFlag(p.country_code)}</span>
-              {p.display_name || p.username}
+              <span className={verifiedNameClass(p.gender, p.is_verified)}>
+                {p.display_name || p.username}
+              </span>
+
               {user && user.id !== p.id && (
                 <Button
                   size="sm"
@@ -380,6 +388,11 @@ export function ProfileView({ username }: { username: string }) {
               )}
             </h1>
             <p className="text-sm text-primary/80">@{p.username}</p>
+            {p.is_verified && (
+              <p className="mt-1 flex justify-center">
+                <VerifiedBadge gender={p.gender} isVerified withLabel />
+              </p>
+            )}
             {p.bio && (
               <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
                 {p.bio}
@@ -391,6 +404,16 @@ export function ProfileView({ username }: { username: string }) {
         <div className="mt-1 flex justify-center">
           <PresenceBadge lastSeenAt={p.last_seen_at} isOnline={p.is_online} />
         </div>
+
+        {isMe && (
+          <>
+            {!p.is_verified && (
+              <VerifyPanel userId={p.id} status={p.verification_status} />
+            )}
+            <ActivityMeter watched={Number(p.reels_watched ?? 0)} />
+          </>
+        )}
+
 
         <button
           type="button"

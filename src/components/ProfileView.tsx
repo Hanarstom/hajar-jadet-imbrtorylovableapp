@@ -353,7 +353,10 @@ export function ProfileView({ username }: { username: string }) {
           <>
             <h1 className="mt-4 flex items-center justify-center gap-2 truncate text-2xl font-black tracking-tight">
               <span>{countryFlag(p.country_code)}</span>
-              {p.display_name || p.username}
+              <span className={verifiedNameClass(p.gender, p.is_verified)}>
+                {p.display_name || p.username}
+              </span>
+
               {user && user.id !== p.id && (
                 <Button
                   size="sm"

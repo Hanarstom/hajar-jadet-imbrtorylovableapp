@@ -27,10 +27,12 @@ import {
   reelEmbedUrl,
 } from "@/lib/neon";
 import { countryFlag } from "@/lib/countries";
+import { VerifiedBadge, verifiedNameClass } from "@/components/VerifiedName";
 import { maybeShowPopunder } from "@/lib/adsterra";
 
+
 export const POST_SELECT =
-  "id, user_id, content, hashtags, video_url, platform, views_count, created_at, profiles(username, display_name, avatar_url, last_seen_at, is_online, country_code)";
+  "id, user_id, content, hashtags, video_url, platform, views_count, created_at, profiles(username, display_name, avatar_url, last_seen_at, is_online, country_code, gender, is_verified)";
 
 export type FeedPost = {
   id: string;
@@ -49,9 +51,12 @@ export type FeedPost = {
         last_seen_at?: string | null;
         is_online?: boolean;
         country_code?: string | null;
+        gender?: string | null;
+        is_verified?: boolean | null;
       }
     | null;
 };
+
 
 export function PostCard({
   post,
@@ -184,8 +189,17 @@ export function PostCard({
           <span>
             <span className="block text-sm font-semibold leading-tight">
               <span className="me-1">{countryFlag(post.profiles?.country_code)}</span>
-              {post.profiles?.display_name || "Unknown"}
+              <span
+                className={verifiedNameClass(post.profiles?.gender, post.profiles?.is_verified)}
+              >
+                {post.profiles?.display_name || "Unknown"}
+              </span>
+              <VerifiedBadge
+                gender={post.profiles?.gender}
+                isVerified={post.profiles?.is_verified}
+              />
             </span>
+
             <span className="block text-xs text-muted-foreground">
               @{post.profiles?.username}
             </span>

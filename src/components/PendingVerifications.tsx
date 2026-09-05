@@ -1,21 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ShieldCheck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
-import { useMediaUrl } from "@/lib/media";
+import { fetchPendingVerifications, reviewVerificationFn } from "@/lib/admin.functions";
 
 type Row = {
   user_id: string;
   username: string;
   display_name: string;
   gender: string;
-  photo_path: string;
+  photo_url: string | null;
   created_at: string;
 };
 
-function Shot({ path }: { path: string }) {
-  const url = useMediaUrl(path);
+function Shot({ url }: { url: string | null }) {
   return (
     <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-primary/30 bg-secondary">
       {url ? <img src={url} alt="صورة التوثيق" className="h-full w-full object-cover" /> : "…"}
@@ -23,28 +22,20 @@ function Shot({ path }: { path: string }) {
   );
 }
 
-/** Admin-only pending verification queue (password is passed straight to the RPC). */
+/** Admin-only pending verification queue; the password is verified server-side. */
 export function PendingVerifications({ pass }: { pass: string }) {
   const qc = useQueryClient();
+  const loadPending = useServerFn(fetchPendingVerifications);
+  const reviewOne = useServerFn(reviewVerificationFn);
 
   const list = useQuery({
     queryKey: ["pending-verifications"],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("admin_pending_verifications", { _pass: pass });
-      if (error) throw error;
-      return (data ?? []) as Row[];
-    },
+    queryFn: async () => (await loadPending({ data: { pass } })) as Row[],
   });
 
   const review = useMutation({
     mutationFn: async ({ user, approve }: { user: string; approve: boolean }) => {
-      const { data, error } = await supabase.rpc("admin_review_verification", {
-        _pass: pass,
-        _user: user,
-        _approve: approve,
-      });
-      if (error) throw error;
-      if (data !== "ok") throw new Error(String(data));
+      await reviewOne({ data: { pass, userId: user, approve } });
     },
     onSuccess: () => {
       toast.success("تم تنفيذ المراجعة");
@@ -53,6 +44,7 @@ export function PendingVerifications({ pass }: { pass: string }) {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   return (
     <section dir="rtl" className="space-y-2">

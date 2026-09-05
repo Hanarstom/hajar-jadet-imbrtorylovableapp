@@ -249,7 +249,6 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          balance: number
           bio: string | null
           country_code: string | null
           created_at: string
@@ -270,7 +269,6 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
-          balance?: number
           bio?: string | null
           country_code?: string | null
           created_at?: string
@@ -291,7 +289,6 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
-          balance?: number
           bio?: string | null
           country_code?: string | null
           created_at?: string
@@ -464,6 +461,21 @@ export type Database = {
           },
         ]
       }
+      user_balances: {
+        Row: {
+          balance: number
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       verifications: {
         Row: {
           created_at: string
@@ -550,21 +562,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      admin_pending_verifications: {
-        Args: { _pass: string }
-        Returns: {
-          created_at: string
-          display_name: string
-          gender: string
-          photo_path: string
-          user_id: string
-          username: string
-        }[]
-      }
-      admin_review_verification: {
-        Args: { _approve: boolean; _pass: string; _user: string }
-        Returns: string
-      }
       evaluate_referral_activity: {
         Args: { _user: string }
         Returns: undefined

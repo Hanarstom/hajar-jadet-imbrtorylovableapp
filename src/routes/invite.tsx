@@ -53,13 +53,19 @@ function InvitePage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("referral_code, balance, country_code")
+        .select("referral_code, country_code")
         .eq("id", user!.id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      const { data: wallet } = await supabase
+        .from("user_balances")
+        .select("balance")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return { ...data, balance: wallet?.balance ?? 0 };
     },
   });
+
 
   const referrals = useQuery({
     queryKey: ["my-referrals", user?.id],

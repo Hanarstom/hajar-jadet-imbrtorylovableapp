@@ -58,7 +58,7 @@ export function PendingVerifications({ pass }: { pass: string }) {
       <ul className="space-y-2">
         {list.data?.map((r) => (
           <li key={r.user_id} className="glass flex items-center gap-3 rounded-2xl p-3">
-            <Shot path={r.photo_path} />
+            <Shot url={r.photo_url} />
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-bold">{r.display_name || r.username}</span>
               <span className="block text-xs text-muted-foreground">@{r.username}</span>

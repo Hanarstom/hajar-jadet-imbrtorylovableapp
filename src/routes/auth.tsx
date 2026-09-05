@@ -28,6 +28,23 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+function normalizeEmail(value: string) {
+  return value.replace(/\s+/g, "").toLowerCase();
+}
+
+function arabicAuthError(message: string) {
+  const m = message.toLowerCase();
+  if (m.includes("invalid login credentials"))
+    return "البريد الإلكتروني أو كلمة المرور غير صحيحة. تأكد من كتابتهما بدون مسافات، أو استخدم «نسيت كلمة المرور».";
+  if (m.includes("weak") || m.includes("pwned"))
+    return "كلمة المرور ضعيفة أو مسربة. اختر كلمة مرور أقوى (أحرف وأرقام ورموز).";
+  if (m.includes("already registered") || m.includes("already been registered"))
+    return "هذا البريد مسجل بالفعل. سجّل الدخول أو استخدم «نسيت كلمة المرور».";
+  if (m.includes("email not confirmed")) return "لم يتم تأكيد البريد بعد.";
+  if (m.includes("rate limit")) return "محاولات كثيرة، انتظر قليلاً ثم أعد المحاولة.";
+  return message;
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -41,14 +58,35 @@ function AuthPage() {
     captureReferralFromUrl();
   }, []);
 
+  async function resetPassword() {
+    const clean = normalizeEmail(email);
+    if (!clean) {
+      toast.error("أدخل بريدك الإلكتروني أولاً");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(clean, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("أرسلنا لك رابط إعادة تعيين كلمة المرور على بريدك");
+    } catch (err) {
+      toast.error(arabicAuthError((err as Error).message));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+    const cleanEmail = normalizeEmail(email);
     try {
       if (mode === "signup") {
         if (!country) throw new Error("اختر بلدك أولاً");
         const { data, error } = await supabase.auth.signUp({
-          email,
+          email: cleanEmail,
           password,
           options: {
             emailRedirectTo: window.location.origin,
@@ -64,7 +102,7 @@ function AuthPage() {
         if (error) throw error;
         if (!data.session) {
           const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
+            email: cleanEmail,
             password,
           });
           if (signInError) throw signInError;
@@ -72,16 +110,20 @@ function AuthPage() {
         clearReferralCode();
         toast.success("Welcome to Neon");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
         if (error) throw error;
       }
       navigate({ to: "/" });
     } catch (err) {
-      toast.error((err as Error).message);
+      toast.error(arabicAuthError((err as Error).message));
     } finally {
       setBusy(false);
     }
   }
+
 
   return (
     <Layout>
@@ -128,6 +170,11 @@ function AuthPage() {
               id="email"
               type="email"
               required
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -139,6 +186,8 @@ function AuthPage() {
               type="password"
               required
               minLength={6}
+              autoCapitalize="none"
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -147,6 +196,17 @@ function AuthPage() {
             {mode === "login" ? "Sign in" : "Sign up"}
           </Button>
         </form>
+        {mode === "login" && (
+          <button
+            type="button"
+            className="mt-3 w-full text-xs text-primary hover:underline"
+            onClick={resetPassword}
+            disabled={busy}
+          >
+            نسيت كلمة المرور؟
+          </button>
+        )}
+
         <button
           className="mt-4 w-full text-xs text-muted-foreground hover:text-foreground"
           onClick={() => setMode(mode === "login" ? "signup" : "login")}

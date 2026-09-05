@@ -18,6 +18,7 @@ import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReelsRouteImport } from './routes/reels'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RPostIdRouteImport } from './routes/r.$postId'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 
@@ -66,6 +67,11 @@ const ReelsRoute = ReelsRouteImport.update({
   path: '/reels',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RPostIdRoute = RPostIdRouteImport.update({
   id: '/r/$postId',
   path: '/r/$postId',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
 }
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
 }
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
 }
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/reels'
+    | '/reset-password'
     | '/r/$postId'
     | '/u/$username'
   fileRoutesByTo: FileRoutesByTo
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/reels'
+    | '/reset-password'
     | '/r/$postId'
     | '/u/$username'
   id:
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/reels'
+    | '/reset-password'
     | '/r/$postId'
     | '/u/$username'
   fileRoutesById: FileRoutesById
@@ -169,6 +181,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ReelsRoute: typeof ReelsRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   RPostIdRoute: typeof RPostIdRoute
   UUsernameRoute: typeof UUsernameRoute
 }
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReelsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/r/$postId': {
       id: '/r/$postId'
       path: '/r/$postId'
@@ -265,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ReelsRoute: ReelsRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   RPostIdRoute: RPostIdRoute,
   UUsernameRoute: UUsernameRoute,
 }

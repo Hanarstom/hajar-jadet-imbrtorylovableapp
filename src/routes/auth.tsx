@@ -170,6 +170,11 @@ function AuthPage() {
               id="email"
               type="email"
               required
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -181,6 +186,8 @@ function AuthPage() {
               type="password"
               required
               minLength={6}
+              autoCapitalize="none"
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -189,6 +196,17 @@ function AuthPage() {
             {mode === "login" ? "Sign in" : "Sign up"}
           </Button>
         </form>
+        {mode === "login" && (
+          <button
+            type="button"
+            className="mt-3 w-full text-xs text-primary hover:underline"
+            onClick={resetPassword}
+            disabled={busy}
+          >
+            نسيت كلمة المرور؟
+          </button>
+        )}
+
         <button
           className="mt-4 w-full text-xs text-muted-foreground hover:text-foreground"
           onClick={() => setMode(mode === "login" ? "signup" : "login")}

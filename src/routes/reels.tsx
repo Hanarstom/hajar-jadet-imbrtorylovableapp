@@ -32,6 +32,7 @@ export const Route = createFileRoute("/reels")({
 });
 
 function Reels() {
+  const { user } = useSession();
 
   const reels = useInfiniteQuery({
     queryKey: ["reels"],
@@ -58,16 +59,17 @@ function Reels() {
           الريلز · Reels
         </h1>
         <SponsoredSlot id="reels-top" />
-        {reels.isLoading && <p className="text-sm text-muted-foreground">Loading reels…</p>}
-        {Array.from({ length: Math.ceil(reelPosts.length / 3) }, (_, chunk) => (
-          <div key={chunk} className="space-y-4">
-            <ReelGrid posts={reelPosts.slice(chunk * 3, chunk * 3 + 3)} />
-            <SponsoredSlot id={`reels-${chunk}`} />
+        {reels.isLoading && <p className="text-sm text-muted-foreground">جارٍ تحميل الريلز…</p>}
+        {reelPosts.map((post, i) => (
+          <div key={post.id} className="space-y-4">
+            <PostCard post={post} currentUserId={user?.id} />
+            <SponsoredSlot id={`reels-${i}`} />
           </div>
         ))}
         {reelPosts.length === 0 && !reels.isLoading && (
-          <p className="text-sm text-muted-foreground">No reels posted yet.</p>
+          <p className="text-sm text-muted-foreground">لا ريلز بعد.</p>
         )}
+
         <InfiniteScrollTrigger
           hasMore={!!reels.hasNextPage}
           loading={reels.isFetchingNextPage}

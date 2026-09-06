@@ -2,10 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
-import { POST_SELECT, type FeedPost } from "@/components/PostCard";
-import { ReelGrid } from "@/components/ReelGrid";
+import { PostCard, POST_SELECT, type FeedPost } from "@/components/PostCard";
 import { SponsoredSlot } from "@/components/SponsoredSlot";
 import { InfiniteScrollTrigger } from "@/components/InfiniteScrollTrigger";
+import { useSession } from "@/hooks/useSession";
+
 
 const REELS_PAGE_SIZE = 9;
 

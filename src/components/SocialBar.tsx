@@ -11,7 +11,8 @@ import { useEffect } from "react";
  * looks like: https://pl<id>.profitableratecpmnetwork.com/xx/yy/zz/<hash>.js
  * A bare domain is a website, not a script, and renders nothing.
  */
-const SOCIAL_BAR_SRC = "";
+const SOCIAL_BAR_SRC =
+  "https://pl31119484.profitableratecpmnetwork.com/ee/90/17/ee90179612a4ffefbc1fffe2dbb423f5.js";
 
 const isScriptUrl = (src: string) => /^https:\/\/\S+\.js(\?\S*)?$/.test(src);
 

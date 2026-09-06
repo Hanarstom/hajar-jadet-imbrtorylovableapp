@@ -3,15 +3,27 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/useSession";
 
-/** Marks the signed-in user as active while the app is open. */
+const HEARTBEAT_MS = 10_000;
+
+function invalidatePresence(queryClient: ReturnType<typeof useQueryClient>) {
+  void queryClient.invalidateQueries({ queryKey: ["feed"] });
+  void queryClient.invalidateQueries({ queryKey: ["reels"] });
+  void queryClient.invalidateQueries({ queryKey: ["profile"] });
+  void queryClient.invalidateQueries({ queryKey: ["profile-posts"] });
+}
+
+/** Marks the signed-in user as active while the app is open, offline as soon as they leave. */
 export function usePresenceHeartbeat() {
   const { user } = useSession();
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!user) return;
+
     const beat = () => {
-      if (document.visibilityState === "visible") void supabase.rpc("touch_presence");
+      if (document.visibilityState === "visible" && navigator.onLine) {
+        void supabase.rpc("touch_presence");
+      }
     };
     const away = () => {
       void supabase
@@ -23,19 +35,47 @@ export function usePresenceHeartbeat() {
       if (document.visibilityState === "visible") beat();
       else away();
     };
+
     beat();
-    const id = window.setInterval(beat, 15_000);
+    const id = window.setInterval(beat, HEARTBEAT_MS);
+
+    // Realtime presence channel: instant join/leave signal for everyone watching.
+    const channel = supabase.channel("online-users", {
+      config: { presence: { key: user.id } },
+    });
+    channel
+      .on("presence", { event: "sync" }, () => invalidatePresence(queryClient))
+      .on("presence", { event: "join" }, () => {
+        beat();
+        invalidatePresence(queryClient);
+      })
+      .on("presence", { event: "leave" }, () => invalidatePresence(queryClient))
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          void channel.track({ at: new Date().toISOString() });
+          beat();
+        }
+      });
+
     document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", beat);
+    window.addEventListener("online", beat);
+    window.addEventListener("offline", away);
     window.addEventListener("pagehide", away);
     window.addEventListener("beforeunload", away);
+
     return () => {
       window.clearInterval(id);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", beat);
+      window.removeEventListener("online", beat);
+      window.removeEventListener("offline", away);
       window.removeEventListener("pagehide", away);
       window.removeEventListener("beforeunload", away);
       away();
+      void supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, queryClient]);
 
   useEffect(() => {
     const channel = supabase
@@ -43,12 +83,7 @@ export function usePresenceHeartbeat() {
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "profiles" },
-        () => {
-          void queryClient.invalidateQueries({ queryKey: ["feed"] });
-          void queryClient.invalidateQueries({ queryKey: ["reels"] });
-          void queryClient.invalidateQueries({ queryKey: ["profile"] });
-          void queryClient.invalidateQueries({ queryKey: ["profile-posts"] });
-        },
+        () => invalidatePresence(queryClient),
       )
       .subscribe();
 
@@ -67,7 +102,7 @@ export function isOnline(lastSeenAt: string | null | undefined, online?: boolean
 
 /** Arabic "left" label with precise elapsed time. */
 export function leftAgoLabel(lastSeenAt: string | null | undefined) {
-  const base = "غادر الآن";
+  const base = "غادرنا الآن";
   if (!lastSeenAt) return base;
   const elapsed = Date.now() - new Date(lastSeenAt).getTime();
   if (elapsed < 60_000) return base;
@@ -77,4 +112,3 @@ export function leftAgoLabel(lastSeenAt: string | null | undefined) {
   if (hours < 24) return `غادر منذ ${hours} س`;
   return `غادر منذ ${Math.floor(hours / 24)} ي`;
 }
-

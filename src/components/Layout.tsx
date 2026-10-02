@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { captureReferralFromUrl } from "@/lib/fingerprint";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, LogOut, BarChart3, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +20,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { user } = useSession();
   const navigate = useNavigate();
   const [term, setTerm] = useState("");
+  useEffect(() => captureReferralFromUrl(), []);
   usePresenceHeartbeat();
   useNotificationAlerts();
 

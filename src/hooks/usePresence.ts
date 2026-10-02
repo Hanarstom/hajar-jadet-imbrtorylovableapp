@@ -72,7 +72,6 @@ export function usePresenceHeartbeat() {
       window.removeEventListener("offline", away);
       window.removeEventListener("pagehide", away);
       window.removeEventListener("beforeunload", away);
-      away();
       void supabase.removeChannel(channel);
     };
   }, [user, queryClient]);

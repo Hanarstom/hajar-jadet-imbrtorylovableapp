@@ -99,15 +99,21 @@ export function isOnline(lastSeenAt: string | null | undefined, online?: boolean
   return online === true && Date.now() - new Date(lastSeenAt).getTime() < ONLINE_WINDOW_MS;
 }
 
-/** Arabic "left" label with precise elapsed time. */
+/** Arabic "last seen" label computed live from last_seen_at. */
 export function leftAgoLabel(lastSeenAt: string | null | undefined) {
-  const base = "غادرنا الآن";
-  if (!lastSeenAt) return base;
-  const elapsed = Date.now() - new Date(lastSeenAt).getTime();
-  if (elapsed < 60_000) return base;
+  if (!lastSeenAt) return "غير متصل";
+  const elapsed = Math.max(0, Date.now() - new Date(lastSeenAt).getTime());
+  if (elapsed < 60_000) return "غادر الآن";
   const mins = Math.floor(elapsed / 60_000);
-  if (mins < 60) return `غادر منذ ${mins} د`;
+  if (mins < 60) return `آخر ظهور منذ ${mins} ${mins <= 10 && mins > 2 ? "دقائق" : "دقيقة"}`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `غادر منذ ${hours} س`;
-  return `غادر منذ ${Math.floor(hours / 24)} ي`;
+  if (hours < 24) return `آخر ظهور منذ ${hours} ${hours <= 10 && hours > 2 ? "ساعات" : "ساعة"}`;
+  const days = Math.floor(hours / 24);
+  return `آخر ظهور منذ ${days} ${days <= 10 && days > 2 ? "أيام" : "يوم"}`;
+}
+
+/** Exact last-seen date & time in Arabic. */
+export function lastSeenDateLabel(lastSeenAt: string | null | undefined) {
+  if (!lastSeenAt) return "";
+  return `آخر ظهور: ${new Date(lastSeenAt).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" })}`;
 }

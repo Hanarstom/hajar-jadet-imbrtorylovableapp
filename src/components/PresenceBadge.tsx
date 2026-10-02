@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { isOnline, leftAgoLabel } from "@/hooks/usePresence";
+import { isOnline, lastSeenDateLabel, leftAgoLabel } from "@/hooks/usePresence";
 
 /** Live green "متصل الآن" chip while active, red "غادر الآن" chip after leaving. */
 export function PresenceBadge({
@@ -37,7 +37,7 @@ export function PresenceBadge({
       <span
         className={`text-sm font-bold ${online ? "text-emerald-400" : "text-red-500/90"}`}
       >
-        {online ? "أهلين وسهلين، نورتنا والله 🥳🥲" : "غادرنا الآن، الله يسامحه 😂"}
+        {online ? "أهلين وسهلين، نورتنا والله 🥳🥲" : lastSeenDateLabel(lastSeenAt) || "غادرنا الآن، الله يسامحه 😂"}
       </span>
     </span>
   );

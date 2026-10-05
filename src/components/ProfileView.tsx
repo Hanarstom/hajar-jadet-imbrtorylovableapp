@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Eye, Users, Clock, Camera, Pencil, UserRound, Film, Bookmark, BarChart3, ChevronDown } from "lucide-react";
+import { Eye, Users, Clock, Camera, Pencil, UserRound, Film, Bookmark, BarChart3, ChevronDown, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +46,7 @@ export function ProfileView({ username }: { username: string }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [showProject, setShowProject] = useState(false);
+  const [showInviters, setShowInviters] = useState(false);
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const counted = useRef(false);
@@ -451,6 +452,51 @@ export function ProfileView({ username }: { username: string }) {
                 reelCount.data ?? 0,
               )}
             />
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setShowInviters((v) => !v)}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/40 bg-secondary/40 px-4 py-3 text-base font-black text-primary"
+        >
+          <UserPlus className="h-5 w-5" /> من دعاني
+          <ChevronDown
+            className={`h-4 w-4 transition-transform ${showInviters ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        {showInviters && (
+          <div dir="rtl" className="mt-3 rounded-2xl border border-border bg-secondary/30 p-3 text-right">
+            {inviters.isLoading && (
+              <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+            )}
+            {!inviters.isLoading && (inviters.data ?? []).length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                {isMe ? "لم يدعُك أحد بعد." : "لا تتوفر معلومات دعوة."}
+              </p>
+            )}
+            <ul className="space-y-2">
+              {(inviters.data ?? []).map((r) => (
+                <li
+                  key={r.id}
+                  className="flex items-center justify-between gap-2 rounded-xl bg-secondary/60 px-3 py-2"
+                >
+                  <Link
+                    to="/u/$username"
+                    params={{ username: r.profile?.username ?? "" }}
+                    className="min-w-0 truncate text-sm font-bold text-primary underline-offset-2 hover:underline"
+                  >
+                    {countryFlag(r.profile?.country_code)}{" "}
+                    {r.profile?.display_name || r.profile?.username || "مستخدم"}
+                    <span className="text-muted-foreground"> @{r.profile?.username ?? "—"}</span>
+                  </Link>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {r.status === "suspicious" ? "قيد المراجعة" : "دعوة موثّقة"}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </section>

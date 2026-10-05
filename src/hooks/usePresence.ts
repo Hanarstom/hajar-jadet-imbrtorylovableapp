@@ -20,16 +20,18 @@ export function usePresenceHeartbeat() {
   useEffect(() => {
     if (!user) return;
 
+    // Supabase query builders are lazy: they only send the request once awaited/then-ed.
     const beat = () => {
       if (document.visibilityState === "visible" && navigator.onLine) {
-        void supabase.rpc("touch_presence");
+        void supabase.rpc("touch_presence").then(() => undefined);
       }
     };
     const away = () => {
       void supabase
         .from("profiles")
         .update({ last_seen_at: new Date().toISOString(), is_online: false })
-        .eq("id", user.id);
+        .eq("id", user.id)
+        .then(() => undefined);
     };
     const onVisibility = () => {
       if (document.visibilityState === "visible") beat();

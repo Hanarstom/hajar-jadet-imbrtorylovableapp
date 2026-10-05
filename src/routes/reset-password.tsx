@@ -33,8 +33,39 @@ function ResetPasswordPage() {
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  async function ensureSession() {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) return true;
+    const url = new URL(window.location.href);
+    const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+    const code = url.searchParams.get("code");
+    const tokenHash = url.searchParams.get("token_hash") || hash.get("token_hash");
+    const access = hash.get("access_token");
+    const refresh = hash.get("refresh_token");
+    try {
+      if (access && refresh) {
+        const { error } = await supabase.auth.setSession({ access_token: access, refresh_token: refresh });
+        if (!error) return true;
+      }
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error) return true;
+      }
+      if (tokenHash) {
+        const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" });
+        if (!error) return true;
+      }
+    } catch {
+      /* ignore */
+    }
+    const again = await supabase.auth.getSession();
+    return Boolean(again.data.session);
+  }
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setReady(Boolean(data.session)));
+    ensureSession().then((ok) => {
+      if (ok) setReady(true);
+    });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       if (session) setReady(true);
     });
@@ -45,6 +76,8 @@ function ResetPasswordPage() {
     e.preventDefault();
     setBusy(true);
     try {
+      const ok = await ensureSession();
+      if (!ok) throw new Error("انتهت صلاحية الرابط. اطلب رابطًا جديدًا من صفحة الدخول «نسيت كلمة المرور».");
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       toast.success("تم تحديث كلمة المرور بنجاح");
@@ -82,7 +115,7 @@ function ResetPasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <Button type="submit" className="w-full" disabled={busy || !ready}>
+          <Button type="submit" className="w-full" disabled={busy}>
             تحديث كلمة المرور
           </Button>
         </form>

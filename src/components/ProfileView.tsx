@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Eye, Users, Clock, Camera, Pencil, UserRound, Film, Bookmark, BarChart3, ChevronDown, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -233,6 +234,31 @@ export function ProfileView({ username }: { username: string }) {
   });
 
   const avatarUrl = useMediaUrl(profile.data?.avatar_url);
+
+  // من دعاني: قائمة الداعين وفق نظام الإحالة (الخصوصية مطبقة على مستوى قاعدة البيانات)
+  const inviters = useQuery({
+    queryKey: ["inviters-of", profileId, user?.id],
+    enabled: !!profileId && showInviters,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("referrals")
+        .select("id, inviter_id, status, created_at")
+        .eq("invited_id", profileId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const rows = data ?? [];
+      if (rows.length === 0) return [];
+      const { data: profs, error: e2 } = await supabase
+        .from("profiles")
+        .select("id, username, display_name, country_code")
+        .in("id", rows.map((r) => r.inviter_id));
+      if (e2) throw e2;
+      return rows.map((r) => ({
+        ...r,
+        profile: profs?.find((pr) => pr.id === r.inviter_id) ?? null,
+      }));
+    },
+  });
   const fileRef = useRef<HTMLInputElement>(null);
 
   const uploadAvatar = useMutation({

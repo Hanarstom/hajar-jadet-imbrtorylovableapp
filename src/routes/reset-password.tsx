@@ -35,6 +35,9 @@ function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [linkError, setLinkError] = useState(false);
+  const [email, setEmail] = useState("");
 
   async function waitForSession(ms: number) {
     const start = Date.now();
@@ -77,8 +80,14 @@ function ResetPasswordPage() {
   }
 
   useEffect(() => {
+    const url = new URL(INITIAL_URL || window.location.href);
+    const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+    if (hash.get("error_code") || hash.get("error") || url.searchParams.get("error_code")) {
+      setLinkError(true);
+    }
     ensureSession().then((ok) => {
       if (ok) setReady(true);
+      setChecking(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       if (session) setReady(true);
@@ -108,6 +117,29 @@ function ResetPasswordPage() {
     }
   }
 
+  async function resend(e: React.FormEvent) {
+    e.preventDefault();
+    const clean = email.replace(/\s+/g, "").toLowerCase();
+    if (!clean) return;
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(clean, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("أرسلنا رابطًا جديدًا. افتحه مرة واحدة فقط وفي نفس المتصفح.");
+    } catch (err) {
+      const m = (err as Error).message.toLowerCase();
+      toast.error(
+        m.includes("rate") || m.includes("seconds")
+          ? "انتظر دقيقة قبل طلب رابط جديد"
+          : (err as Error).message,
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <Layout>
       <div className="mx-auto max-w-sm rounded-xl border border-border bg-card p-6" dir="rtl">
@@ -115,24 +147,52 @@ function ResetPasswordPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           {ready
             ? "اختر كلمة مرور جديدة لحسابك"
-            : "افتح هذه الصفحة من الرابط الذي وصلك على بريدك الإلكتروني"}
+            : checking
+              ? "جارٍ التحقق من الرابط…"
+              : "افتح هذه الصفحة من الرابط الذي وصلك على بريدك الإلكتروني"}
         </p>
-        <form className="mt-5 space-y-3" onSubmit={submit}>
-          <div>
-            <Label htmlFor="new-password">كلمة المرور الجديدة</Label>
-            <Input
-              id="new-password"
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={busy}>
-            تحديث كلمة المرور
-          </Button>
-        </form>
+        {!ready && !checking && linkError && (
+          <p className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
+            هذا الرابط استُخدم من قبل أو انتهت صلاحيته. كل رابط يعمل مرة واحدة فقط. اطلب رابطًا جديدًا
+            من هنا، وافتحه مرة واحدة فقط.
+          </p>
+        )}
+        {ready || checking ? (
+          <form className="mt-5 space-y-3" onSubmit={submit}>
+            <div>
+              <Label htmlFor="new-password">كلمة المرور الجديدة</Label>
+              <Input
+                id="new-password"
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={busy || checking}>
+              تحديث كلمة المرور
+            </Button>
+          </form>
+        ) : (
+          <form className="mt-5 space-y-3" onSubmit={resend}>
+            <div>
+              <Label htmlFor="reset-email">بريدك الإلكتروني</Label>
+              <Input
+                id="reset-email"
+                type="email"
+                required
+                autoCapitalize="none"
+                autoCorrect="off"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={busy}>
+              أرسل رابطًا جديدًا
+            </Button>
+          </form>
+        )}
       </div>
     </Layout>
   );

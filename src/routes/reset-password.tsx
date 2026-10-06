@@ -27,16 +27,30 @@ export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
 });
 
+// Capture the link tokens before the auth client strips them from the address bar.
+const INITIAL_URL = typeof window !== "undefined" ? window.location.href : "";
+
 function ResetPasswordPage() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  async function waitForSession(ms: number) {
+    const start = Date.now();
+    while (Date.now() - start < ms) {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) return true;
+      await new Promise((r) => setTimeout(r, 300));
+    }
+    return false;
+  }
+
   async function ensureSession() {
     const { data } = await supabase.auth.getSession();
     if (data.session) return true;
-    const url = new URL(window.location.href);
+    const href = INITIAL_URL || window.location.href;
+    const url = new URL(href);
     const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
     const code = url.searchParams.get("code");
     const tokenHash = url.searchParams.get("token_hash") || hash.get("token_hash");
@@ -58,8 +72,8 @@ function ResetPasswordPage() {
     } catch {
       /* ignore */
     }
-    const again = await supabase.auth.getSession();
-    return Boolean(again.data.session);
+    // The auth client may still be processing the link in the background.
+    return waitForSession(4000);
   }
 
   useEffect(() => {

@@ -174,20 +174,20 @@ export function PostCard({
   }
 
   return (
-    <article className="glass glass-hover rounded-2xl p-4">
-      <header className="flex items-center justify-between gap-2">
+    <article className="post-card border-b border-border py-5">
+      <header dir="rtl" className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
         <Link
           to="/u/$username"
           params={{ username: post.profiles?.username ?? "" }}
-          className="flex items-center gap-2"
+          className="flex min-w-0 items-start gap-3"
         >
           <Avatar
             src={post.profiles?.avatar_url}
             name={post.profiles?.display_name}
-            className="h-9 w-9 text-sm"
+            className="h-10 w-10 shrink-0 text-sm"
           />
-          <span>
-            <span className="block text-sm font-semibold leading-tight">
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold leading-relaxed">
               <span className="me-1">{countryFlag(post.profiles?.country_code)}</span>
               <span
                 className={verifiedNameClass(post.profiles?.gender, post.profiles?.is_verified)}
@@ -221,7 +221,7 @@ export function PostCard({
         </div>
       </header>
 
-      {post.content && <p className="mt-3 whitespace-pre-wrap text-sm">{post.content}</p>}
+      {post.content && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed">{post.content}</p>}
       {post.hashtags && <p className="mt-1 text-sm text-primary">{post.hashtags}</p>}
 
       {embed && (
@@ -235,7 +235,7 @@ export function PostCard({
       )}
 
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <Reactions postId={post.id} currentUserId={currentUserId} />
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1" title="المشاهدات">
@@ -251,12 +251,12 @@ export function PostCard({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
+      <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-border pt-3">
         <div className="relative">
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-full text-xs font-semibold"
+            className="rounded-full bg-secondary text-xs font-semibold"
             onClick={() => setShowShare((v) => !v)}
           >
             <Share2 className="mr-1 h-4 w-4" /> مشاركة
@@ -275,7 +275,7 @@ export function PostCard({
         <Button
           variant="ghost"
           size="sm"
-          className={`rounded-full text-xs font-semibold ${saved.data ? "text-primary" : ""}`}
+          className={`rounded-full bg-secondary text-xs font-semibold ${saved.data ? "text-primary" : ""}`}
           onClick={() => toggleSave.mutate()}
         >
           <Bookmark className={`mr-1 h-4 w-4 ${saved.data ? "fill-current" : ""}`} /> حفظ
@@ -320,7 +320,7 @@ export function PostCard({
             </div>
           )}
         </div>
-        <span className="text-[11px] text-muted-foreground">
+        <span className="ms-auto text-[10px] text-muted-foreground">
           {new Date(post.created_at).toLocaleString()}
         </span>
       </div>

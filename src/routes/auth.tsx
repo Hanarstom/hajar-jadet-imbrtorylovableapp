@@ -23,6 +23,8 @@ export const Route = createFileRoute("/auth")({
         property: "og:description",
         content: "Join Neon: post, follow creators and track your reel views.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,

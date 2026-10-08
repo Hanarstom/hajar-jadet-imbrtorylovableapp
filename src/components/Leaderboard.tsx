@@ -27,8 +27,8 @@ export function Leaderboard() {
   const king = top.data[0]!;
 
   return (
-    <section dir="rtl" className="glass rounded-3xl p-4">
-      <h2 className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
+    <section dir="rtl" className="border-b border-border py-4">
+      <h2 className="text-sm font-bold text-foreground">
         لوحة الصدارة الملكية · 24 ساعة
       </h2>
 
@@ -38,14 +38,14 @@ export function Leaderboard() {
             key={r.id}
             to="/u/$username"
             params={{ username: r.username }}
-            className={`relative rounded-2xl border p-3 text-center ${
+            className={`relative rounded-lg border p-3 text-center ${
               i === 0
-                ? "border-yellow-400/60 bg-yellow-400/10 shadow-neon"
+                ? "border-royal/60 bg-royal/10"
                 : "border-border bg-secondary/40"
             }`}
           >
             {i === 0 && (
-              <Crown className="crown-bounce absolute -top-4 left-1/2 h-7 w-7 -translate-x-1/2 fill-yellow-400 text-yellow-400 drop-shadow-[0_0_10px_#facc15]" />
+              <Crown className="crown-bounce absolute -top-4 left-1/2 h-7 w-7 -translate-x-1/2 fill-royal text-royal" />
             )}
             <Avatar
               src={r.avatar_url}
@@ -62,7 +62,7 @@ export function Leaderboard() {
         ))}
       </div>
 
-      <p className="mt-4 rounded-2xl border border-yellow-400/30 bg-yellow-400/5 p-3 text-center text-xs font-bold leading-relaxed text-yellow-300">
+      <p className="mt-4 rounded-lg border border-royal/30 bg-royal/5 p-3 text-center text-xs font-bold leading-relaxed text-royal">
         {king.display_name || king.username} — هذا ملك الـ 24 ساعة اليوم! هذا سلطان اليوم!
         كن مثله في اليوم التالي!
       </p>

@@ -96,7 +96,7 @@ export function ReelFrame({
   return (
     <div
       ref={wrapRef}
-      className="relative mt-3 overflow-hidden rounded-2xl border border-primary/20"
+      className="reel-frame relative mt-4 overflow-hidden rounded-lg bg-secondary"
     >
       {active ? (
         <iframe
@@ -115,7 +115,7 @@ export function ReelFrame({
           className="grid aspect-[9/16] w-full place-items-center bg-secondary/50"
           aria-label="تشغيل الريل"
         >
-          <span className="grid h-16 w-16 place-items-center rounded-full border border-primary/50 bg-background/70 text-primary shadow-neon">
+          <span className="grid h-16 w-16 place-items-center rounded-full border border-border bg-background/70 text-foreground">
             <Play className="h-7 w-7" />
           </span>
         </button>

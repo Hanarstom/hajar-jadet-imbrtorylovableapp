@@ -16,7 +16,7 @@ export function ReelGrid({ posts }: { posts: FeedPost[] }) {
             key={post.id}
             to="/r/$postId"
             params={{ postId: post.id }}
-            className="glass glass-hover relative block overflow-hidden rounded-2xl"
+            className="relative block overflow-hidden rounded-lg border border-border"
           >
             <span className="block aspect-[9/16] w-full bg-secondary/50">
               {ytId ? (

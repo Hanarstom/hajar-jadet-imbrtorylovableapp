@@ -33,24 +33,23 @@ export function BottomNav() {
   return (
     <nav
       dir="rtl"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-primary/15 bg-background/80 backdrop-blur-xl"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="bottom-navigation fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur-md"
     >
-      <ul className="mx-auto grid max-w-2xl grid-cols-6">
+      <ul className="mx-auto grid max-w-3xl grid-cols-6">
         {TABS.map(({ to, label, Icon }) => (
           <li key={to} className="min-w-0">
             <Link
               to={to}
               activeOptions={{ exact: to === "/" }}
-              className="group flex flex-col items-center gap-1 px-1 py-2.5 text-muted-foreground transition-colors data-[status=active]:text-primary"
+              className="group flex flex-col items-center min-h-16 justify-center gap-1.5 px-0.5 py-2.5 text-muted-foreground transition-colors data-[status=active]:text-primary"
             >
               <span className="relative">
                 <Icon
-                  className={`h-5 w-5 shrink-0 transition-transform group-hover:-translate-y-0.5 group-data-[status=active]:drop-shadow-[0_0_10px_var(--primary)] ${
+                  className={`h-5 w-5 shrink-0 transition-transform group-hover:-translate-y-0.5 group-data-[status=active]:fill-primary/15 ${
                     to === "/notifications" && (unread.data ?? 0) > 0
                       ? "text-destructive"
                       : to === "/invite"
-                        ? "text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.9)]"
+                        ? "text-primary"
                         : ""
                   }`}
                 />
@@ -61,7 +60,7 @@ export function BottomNav() {
                 )}
               </span>
               <span
-                className={`w-full truncate text-center text-[11px] leading-none ${to === "/invite" ? "font-black text-emerald-400" : "font-semibold"}`}
+                className={`w-full text-center text-[10px] leading-normal sm:text-xs ${to === "/invite" ? "font-bold text-primary" : "font-semibold"}`}
               >
                 {label}
               </span>

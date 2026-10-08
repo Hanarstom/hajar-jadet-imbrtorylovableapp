@@ -30,15 +30,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen text-foreground">
-      <header className="sticky top-0 z-20 border-b border-border bg-[#18191a]/95 backdrop-blur-xl">
-        <div className="mx-auto max-w-2xl px-4 py-2.5">
-          <div className="flex items-center gap-2">
-            <Link to="/" className="min-w-0 flex-1">
-              <span className="neon-text block text-[15px] font-black leading-tight tracking-tight">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-md">
+        <div className="mx-auto max-w-3xl px-4 py-3">
+          <div dir="rtl" className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:gap-4">
+            <Link to="/" className="flex min-w-0 items-center gap-2">
+              <img src="/icon-192.png" alt="" className="hidden h-9 w-9 shrink-0 rounded-lg sm:block" />
+              <span className="block text-[14px] font-bold leading-relaxed text-primary sm:text-lg">
                 {PLATFORM_NAME}
               </span>
             </Link>
+            <div className="platform-header-tools flex shrink-0 items-center gap-0.5 sm:gap-1">
             <Button asChild variant="ghost" size="sm" className="rounded-full">
               <Link to="/notifications" aria-label="الإشعارات">
                 <Bell className="h-4 w-4 text-destructive" />
@@ -61,15 +63,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <LogOut className="h-4 w-4" />
               </Button>
             ) : (
-              <Button asChild size="sm" className="rounded-full font-bold">
+              <Button asChild size="sm" className="rounded-full bg-foreground font-bold text-background hover:bg-foreground/90">
                 <Link to="/auth">دخول</Link>
               </Button>
             )}
+            </div>
           </div>
 
           <form
             dir="rtl"
-            className="mt-2 flex items-center gap-2 rounded-full bg-secondary/70 px-3 py-1.5"
+            className="mt-3 flex items-center gap-3 rounded-full border border-border bg-secondary px-4 py-1.5"
             onSubmit={(e) => {
               e.preventDefault();
               navigate({ to: "/friends" });
@@ -85,7 +88,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </form>
         </div>
       </header>
-      <main className="mx-auto max-w-2xl px-4 pb-28 pt-4">{children}</main>
+      <main className="platform-main mx-auto max-w-3xl px-4 pb-44 pt-4 sm:px-6">{children}</main>
       <Mascot />
       <TextPostFab />
       <SocialBar />

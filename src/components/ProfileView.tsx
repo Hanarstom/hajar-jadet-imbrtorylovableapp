@@ -32,7 +32,7 @@ function StatTile({
   value: string;
 }) {
   return (
-    <div className="glass rounded-2xl px-3 py-3 text-center">
+    <div className="rounded-lg bg-secondary px-3 py-3 text-center">
       <Icon className="mx-auto h-4 w-4 text-primary" />
       <p className="neon-text mt-1.5 text-lg font-black leading-none">{value}</p>
       <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -301,11 +301,9 @@ export function ProfileView({ username }: { username: string }) {
 
   return (
     <div className="space-y-4">
-      <section className="glass relative overflow-hidden rounded-3xl p-6 text-center">
-        <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
+      <section className="relative border-b border-border py-6 text-center">
         <div className="relative mx-auto h-28 w-28">
-          <div className="absolute inset-0 rounded-full bg-primary/25 blur-xl" />
-          <span className="relative grid h-28 w-28 place-items-center overflow-hidden rounded-full border-2 border-primary/60 bg-secondary text-3xl font-black shadow-neon">
+          <span className="relative grid h-28 w-28 place-items-center overflow-hidden rounded-full border-2 border-border bg-secondary text-3xl font-bold">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -378,7 +376,7 @@ export function ProfileView({ username }: { username: string }) {
           </div>
         ) : (
           <>
-            <h1 className="mt-4 flex items-center justify-center gap-2 truncate text-2xl font-black tracking-tight">
+            <h1 className="profile-heading mt-4 flex flex-wrap items-center justify-center gap-2 text-2xl font-bold">
               <span>{countryFlag(p.country_code)}</span>
               <span className={verifiedNameClass(p.gender, p.is_verified)}>
                 {p.display_name || p.username}
@@ -445,7 +443,7 @@ export function ProfileView({ username }: { username: string }) {
         <button
           type="button"
           onClick={() => setShowProject((v) => !v)}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/50 bg-primary/15 px-4 py-3 text-base font-black text-primary shadow-neon"
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-secondary px-4 py-3 text-sm font-semibold text-foreground"
         >
           <BarChart3 className="h-5 w-5" /> مشاهدة المشروع
           <ChevronDown
@@ -484,7 +482,7 @@ export function ProfileView({ username }: { username: string }) {
         <button
           type="button"
           onClick={() => setShowInviters((v) => !v)}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/40 bg-secondary/40 px-4 py-3 text-base font-black text-primary"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-secondary px-4 py-3 text-sm font-semibold text-foreground"
         >
           <UserPlus className="h-5 w-5" /> من دعاني
           <ChevronDown
@@ -528,7 +526,7 @@ export function ProfileView({ username }: { username: string }) {
       </section>
 
       {profileStories.data && profileStories.data.length > 0 && (
-        <section dir="rtl" className="glass rounded-2xl p-4">
+        <section dir="rtl" className="border-b border-border py-4">
           <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
             القصص النصية
           </h2>

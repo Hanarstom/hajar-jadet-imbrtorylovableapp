@@ -32,14 +32,14 @@ export function PlatformAds() {
   if (!ads.data || ads.data.length === 0) return null;
 
   return (
-    <div dir="rtl" className="space-y-2">
+    <div dir="rtl" className="divide-y divide-border">
       {ads.data.map((ad) => (
-        <article key={ad.id} className="glass rounded-2xl border border-primary/25 p-4">
-          <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-            <Megaphone className="h-3.5 w-3.5" /> إعلان الإدارة
+        <article key={ad.id} className="relative border-b border-border py-5 pe-14">
+          <p className="flex items-center gap-2 text-xs font-semibold text-primary">
+            <span className="absolute right-0 top-5 grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground"><Megaphone className="h-5 w-5" /></span> إعلان الإدارة
           </p>
-          {ad.title && <h3 className="mt-1.5 text-sm font-black">{ad.title}</h3>}
-          {ad.body && <p className="mt-1 whitespace-pre-wrap text-sm">{ad.body}</p>}
+          {ad.title && <h3 className="mt-2 text-base font-bold">{ad.title}</h3>}
+          {ad.body && <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{ad.body}</p>}
           {ad.link_url && (
             <a
               href={ad.link_url}

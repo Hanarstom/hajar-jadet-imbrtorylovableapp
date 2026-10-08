@@ -44,14 +44,14 @@ export function TextPostFab() {
 
   return (
     <>
-      <button
+      <Button
         type="button"
         aria-label="منشور نصي جديد"
         onClick={() => setOpen(true)}
-        className="fixed bottom-24 left-4 z-40 grid h-16 w-16 place-items-center rounded-full border border-primary/50 bg-primary text-primary-foreground shadow-neon"
+        className="create-post fixed left-4 z-40 h-12 w-28 rounded-full border border-destructive bg-destructive text-destructive-foreground shadow-create hover:bg-destructive/90 sm:left-8"
       >
-        <Plus className="h-8 w-8" />
-      </button>
+        <Plus className="size-7" />
+      </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-md text-right">

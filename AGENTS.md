@@ -12,3 +12,6 @@
 ## Presentation architecture
 - Keep the shared social-video theme in `src/styles.css` and apply semantic tokens through existing presentation components; this preserves behavior and keeps light/dark surfaces consistent.
 - UI-only redesigns must leave handlers, queries, hooks, routes, media activation thresholds and advertising scripts unchanged; visual previews are references, never a source of new content or features.
+
+## Shared posts
+- Keep the home feed inclusive of text and video posts and periodically refresh its existing query; members viewing an open feed must also receive new public text posts without changing publishing or advertising behavior.

@@ -57,6 +57,8 @@ function Feed() {
 
   const feed = useInfiniteQuery({
     queryKey: ["feed"],
+    // Keep other members' new posts visible even when this feed is already open.
+    refetchInterval: 10_000,
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const { data, error } = await supabase

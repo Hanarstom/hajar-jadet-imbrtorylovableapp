@@ -1,4 +1,5 @@
-# Neon Social Feed
+hajar-jadet-imbrtorylovableapp
+
 
 Build a minimal working Social Media Platform named "Neon" linked to my connected Supabase database. Strict budget optimization for low credits:
 
@@ -20,11 +21,11 @@ Generate complete clean backend schemas and basic frontend in ONE fast step.
 
 This project was built with [Lovable](https://lovable.dev).
 
-**Live app**: https://neon-social-hub-11.lovable.app
+**Live app**: https://hajar-jadet-imbrtorylovableapp.lovable.app
 
 ## Build with Lovable
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/7f2b2de9-0888-47fa-89d6-93cefa69597f).
+Continue developing this project in the [Lovable editor] https://hajar-jadet-imbrtorylovableapp.lovable.app
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
 - **Stay in sync**: every change made in Lovable is committed straight to this repository.

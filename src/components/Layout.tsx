@@ -11,7 +11,6 @@ import { usePresenceHeartbeat } from "@/hooks/usePresence";
 import { useNotificationAlerts } from "@/hooks/useNotificationAlerts";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { TextPostFab } from "@/components/TextPostFab";
-import { Mascot } from "@/components/Mascot";
 import { SocialBar } from "@/components/SocialBar";
 
 export const PLATFORM_NAME = "منصة حجر الجاديت الإمبراطوري";
@@ -89,7 +88,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="platform-main mx-auto max-w-3xl px-4 pb-44 pt-4 sm:px-6">{children}</main>
-      <Mascot />
       <TextPostFab />
       <SocialBar />
       <BottomNav />

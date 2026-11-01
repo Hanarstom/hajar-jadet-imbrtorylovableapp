@@ -309,6 +309,105 @@ export type Database = {
         }
         Relationships: []
       }
+      push_deliveries: {
+        Row: {
+          attempts: number
+          event_id: string
+          lease_until: string | null
+          response_status: number | null
+          status: string
+          subscription_id: string
+        }
+        Insert: {
+          attempts?: number
+          event_id: string
+          lease_until?: string | null
+          response_status?: number | null
+          status?: string
+          subscription_id: string
+        }
+        Update: {
+          attempts?: number
+          event_id?: string
+          lease_until?: string | null
+          response_status?: number | null
+          status?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_deliveries_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "push_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_deliveries_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "push_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_events: {
+        Row: {
+          actor_id: string
+          created_at: string
+          id: string
+          kind: string
+          post_id: string | null
+          recipient_id: string | null
+          secret: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          post_id?: string | null
+          recipient_id?: string | null
+          secret?: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          post_id?: string | null
+          recipient_id?: string | null
+          secret?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reactions: {
         Row: {
           created_at: string
@@ -562,6 +661,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_push_deliveries: {
+        Args: { _event: string }
+        Returns: {
+          attempts: number
+          event_id: string
+          lease_until: string | null
+          response_status: number | null
+          status: string
+          subscription_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "push_deliveries"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       evaluate_referral_activity: {
         Args: { _user: string }
         Returns: undefined

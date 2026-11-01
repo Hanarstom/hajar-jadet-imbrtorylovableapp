@@ -9,7 +9,6 @@ import { ReelComposer } from "@/components/ReelComposer";
 import { Leaderboard } from "@/components/Leaderboard";
 import { SponsoredSlot } from "@/components/SponsoredSlot";
 import { Stories } from "@/components/Stories";
-import { RollingEmoji } from "@/components/RollingEmoji";
 import { PlatformAds } from "@/components/PlatformAds";
 import { useSession } from "@/hooks/useSession";
 import { InfiniteScrollTrigger } from "@/components/InfiniteScrollTrigger";
@@ -77,9 +76,7 @@ function Feed() {
   return (
     <Layout>
       <div className="space-y-4">
-        <RollingEmoji />
-
-        <Leaderboard />
+        <Stories />
 
         {user ? (
           <div className="glass rounded-2xl p-3">
@@ -113,7 +110,7 @@ function Feed() {
           </div>
         )}
 
-        <Stories />
+        <Leaderboard />
 
         <PlatformAds />
 

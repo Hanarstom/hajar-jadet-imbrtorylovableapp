@@ -1,3 +1,7 @@
+# Admin announcements location
+- [ ] Remove only admin announcements from home and add the profile link and separate auto-updating archive page.
+- [ ] Verify the page, existing sections and admin access; explain existing sign-in and recovery without changing credentials.
+
 # UI-only redesign
 - [x] Remove the two animated mascot areas; move stories and the existing composer to the top without changing their actions.
 - [x] Add direct standards-based background Web Push for comments, new posts and new members without Firebase or external accounts.

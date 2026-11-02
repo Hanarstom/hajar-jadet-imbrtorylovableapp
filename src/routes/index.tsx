@@ -9,7 +9,6 @@ import { ReelComposer } from "@/components/ReelComposer";
 import { Leaderboard } from "@/components/Leaderboard";
 import { SponsoredSlot } from "@/components/SponsoredSlot";
 import { Stories } from "@/components/Stories";
-import { PlatformAds } from "@/components/PlatformAds";
 import { useSession } from "@/hooks/useSession";
 import { InfiniteScrollTrigger } from "@/components/InfiniteScrollTrigger";
 
@@ -111,8 +110,6 @@ function Feed() {
         )}
 
         <Leaderboard />
-
-        <PlatformAds />
 
         <SponsoredSlot id="feed-top" />
 

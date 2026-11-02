@@ -29,7 +29,7 @@ async function subscribe() {
   }
   const j = sub.toJSON();
   await savePushSubscription({
-    data: { endpoint: sub.endpoint, p256dh: j.keys!.p256dh!, auth: j.keys!.auth! },
+    data: { endpoint: sub.endpoint, p256dh: j.keys!['p256dh']!, auth: j.keys!['auth']! },
   });
 }
 

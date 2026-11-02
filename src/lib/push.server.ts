@@ -8,7 +8,7 @@ function b64url(bytes: Uint8Array) {
 
 /** Derives stable VAPID keys from the WEB_PUSH_KEY_SEED secret (no external accounts). */
 export async function getVapidKeys() {
-  const seed = process.env.WEB_PUSH_KEY_SEED;
+  const seed = process.env['WEB_PUSH_KEY_SEED'];
   if (!seed) throw new Error("WEB_PUSH_KEY_SEED missing");
   const digest = new Uint8Array(
     await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`vapid:${seed}`)),

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/Layout";
 import { Avatar } from "@/components/Avatar";
 import { useSession } from "@/hooks/useSession";
+import { useWebPush } from "@/hooks/useWebPush";
 
 export const Route = createFileRoute("/notifications")({
   head: () => ({
@@ -49,6 +50,7 @@ const REACTION_LABEL: Record<string, string> = {
 function Notifications() {
   const { user, loading } = useSession();
   const qc = useQueryClient();
+  const push = useWebPush();
 
   const list = useQuery({
     queryKey: ["notifications", user?.id],
@@ -130,6 +132,23 @@ function Notifications() {
             تحديد كمقروء
           </Button>
         </div>
+
+        {push.state !== "granted" && (
+          <div className="glass flex items-center justify-between gap-3 rounded-2xl p-3 text-sm">
+            <span>
+              {push.state === "unsupported"
+                ? "هذا المتصفح لا يدعم إشعارات الهاتف. على آيفون أضف المنصة للشاشة الرئيسية أولًا."
+                : push.state === "denied"
+                  ? "الإشعارات محظورة. فعّلها من إعدادات المتصفح."
+                  : "فعّل إشعارات الهاتف لتصلك حتى والمنصة مغلقة."}
+            </span>
+            {push.state === "default" && (
+              <Button size="sm" onClick={() => void push.enable().catch(() => {})}>
+                تفعيل
+              </Button>
+            )}
+          </div>
+        )}
 
         <ul className="space-y-2">
           {list.data?.map((n) => {

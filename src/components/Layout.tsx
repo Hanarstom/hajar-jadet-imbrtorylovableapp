@@ -9,6 +9,7 @@ import { useSession } from "@/hooks/useSession";
 import { BottomNav } from "@/components/BottomNav";
 import { usePresenceHeartbeat } from "@/hooks/usePresence";
 import { useNotificationAlerts } from "@/hooks/useNotificationAlerts";
+import { useWebPush } from "@/hooks/useWebPush";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { TextPostFab } from "@/components/TextPostFab";
 import { SocialBar } from "@/components/SocialBar";
@@ -22,6 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => captureReferralFromUrl(), []);
   usePresenceHeartbeat();
   useNotificationAlerts();
+  useWebPush();
 
   async function signOut() {
     await supabase.auth.signOut();

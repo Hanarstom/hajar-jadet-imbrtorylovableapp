@@ -19,6 +19,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as RPostIdRouteImport } from './routes/r.$postId'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiPublicWebPushRouteImport } from './routes/api/public/web-push'
@@ -73,6 +74,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RPostIdRoute = RPostIdRouteImport.update({
   id: '/r/$postId',
   path: '/r/$postId',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/web-push': typeof ApiPublicWebPushRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/web-push': typeof ApiPublicWebPushRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/web-push': typeof ApiPublicWebPushRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reels'
     | '/reset-password'
+    | '/terms'
     | '/r/$postId'
     | '/u/$username'
     | '/api/public/web-push'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reels'
     | '/reset-password'
+    | '/terms'
     | '/r/$postId'
     | '/u/$username'
     | '/api/public/web-push'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reels'
     | '/reset-password'
+    | '/terms'
     | '/r/$postId'
     | '/u/$username'
     | '/api/public/web-push'
@@ -194,6 +206,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ReelsRoute: typeof ReelsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TermsRoute: typeof TermsRoute
   RPostIdRoute: typeof RPostIdRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicWebPushRoute: typeof ApiPublicWebPushRoute
@@ -271,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/r/$postId': {
       id: '/r/$postId'
       path: '/r/$postId'
@@ -306,6 +326,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ReelsRoute: ReelsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TermsRoute: TermsRoute,
   RPostIdRoute: RPostIdRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicWebPushRoute: ApiPublicWebPushRoute,

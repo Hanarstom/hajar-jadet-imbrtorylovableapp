@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Eye, Users, Clock, Camera, Pencil, UserRound, Film, Bookmark, BarChart3, ChevronDown, UserPlus } from "lucide-react";
+import { Eye, Users, Clock, Camera, Pencil, UserRound, Film, Bookmark, BarChart3, ChevronDown, UserPlus, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -489,6 +489,10 @@ export function ProfileView({ username }: { username: string }) {
             className={`h-4 w-4 transition-transform ${showInviters ? "rotate-180" : ""}`}
           />
         </button>
+
+        <Button asChild variant="secondary" className="mt-2 h-auto w-full gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold">
+          <Link to="/terms"><FileText className="h-5 w-5" /> شروط الربح والإعلانات</Link>
+        </Button>
 
         {showInviters && (
           <div dir="rtl" className="mt-3 rounded-2xl border border-border bg-secondary/30 p-3 text-right">

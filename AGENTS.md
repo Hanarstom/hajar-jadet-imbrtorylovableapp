@@ -14,6 +14,7 @@
 - UI-only redesigns must leave handlers, queries, hooks, routes, media activation thresholds and advertising scripts unchanged; visual previews are references, never a source of new content or features.
 
 ## Shared posts
+- Admin announcements use the separate public `/terms` route linked from profiles, with paginated reads and periodic refresh of `platform_ads`; keep home free of this component and preserve the admin write flow.
 - Keep the home feed inclusive of text and video posts and periodically refresh its existing query; members viewing an open feed must also receive new public text posts without changing publishing or advertising behavior.
 
 ## Phone notifications

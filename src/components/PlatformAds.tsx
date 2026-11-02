@@ -1,6 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { Megaphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { InfiniteScrollTrigger } from "@/components/InfiniteScrollTrigger";
+import { Button } from "@/components/ui/button";
 
 export type PlatformAd = {
   id: string;
@@ -11,30 +13,43 @@ export type PlatformAd = {
 };
 
 export function usePlatformAds() {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["platform-ads"],
-    queryFn: async () => {
+    initialPageParam: 0,
+    refetchInterval: 10_000,
+    queryFn: async ({ pageParam }) => {
       const { data, error } = await supabase
         .from("platform_ads")
         .select("id, title, body, link_url, created_at")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
-        .limit(5);
+        .order("id", { ascending: false })
+        .range(pageParam, pageParam + 29);
       if (error) throw error;
       return (data ?? []) as PlatformAd[];
     },
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.length === 30 ? pages.length * 30 : undefined,
   });
 }
 
 /** Announcements published from the private admin section. */
 export function PlatformAds() {
   const ads = usePlatformAds();
-  if (!ads.data || ads.data.length === 0) return null;
+  const publications = ads.data?.pages.flat() ?? [];
+  if (ads.isPending) return <p dir="rtl" className="py-6 text-sm text-muted-foreground">جارٍ تحميل منشورات الإدارة…</p>;
+  if (ads.isError) return (
+    <div dir="rtl" className="space-y-3 py-6">
+      <p className="text-sm text-muted-foreground">تعذر تحميل منشورات الإدارة.</p>
+      <Button variant="outline" onClick={() => void ads.refetch()}>إعادة المحاولة</Button>
+    </div>
+  );
+  if (publications.length === 0) return <p dir="rtl" className="py-6 text-sm text-muted-foreground">لا توجد منشورات إدارة بعد.</p>;
 
   return (
     <div dir="rtl" className="divide-y divide-border">
-      {ads.data.map((ad) => (
-        <article key={ad.id} className="relative border-b border-border py-5 pe-14">
+      {publications.map((ad) => (
+        <article key={ad.id} className="relative break-words border-b border-border py-5 pe-14">
           <p className="flex items-center gap-2 text-xs font-semibold text-primary">
             <span className="absolute right-0 top-5 grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground"><Megaphone className="h-5 w-5" /></span> إعلان الإدارة
           </p>
@@ -52,6 +67,11 @@ export function PlatformAds() {
           )}
         </article>
       ))}
+      <InfiniteScrollTrigger
+        hasMore={!!ads.hasNextPage}
+        loading={ads.isFetchingNextPage}
+        onLoadMore={() => void ads.fetchNextPage()}
+      />
     </div>
   );
 }

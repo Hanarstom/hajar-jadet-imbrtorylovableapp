@@ -21,6 +21,7 @@ import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RPostIdRouteImport } from './routes/r.$postId'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as ApiPublicWebPushRouteImport } from './routes/api/public/web-push'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,6 +83,11 @@ const UUsernameRoute = UUsernameRouteImport.update({
   path: '/u/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWebPushRoute = ApiPublicWebPushRouteImport.update({
+  id: '/api/public/web-push',
+  path: '/api/public/web-push',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/api/public/web-push': typeof ApiPublicWebPushRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/api/public/web-push': typeof ApiPublicWebPushRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/api/public/web-push': typeof ApiPublicWebPushRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/r/$postId'
     | '/u/$username'
+    | '/api/public/web-push'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/r/$postId'
     | '/u/$username'
+    | '/api/public/web-push'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/r/$postId'
     | '/u/$username'
+    | '/api/public/web-push'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   RPostIdRoute: typeof RPostIdRoute
   UUsernameRoute: typeof UUsernameRoute
+  ApiPublicWebPushRoute: typeof ApiPublicWebPushRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/web-push': {
+      id: '/api/public/web-push'
+      path: '/api/public/web-push'
+      fullPath: '/api/public/web-push'
+      preLoaderRoute: typeof ApiPublicWebPushRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   RPostIdRoute: RPostIdRoute,
   UUsernameRoute: UUsernameRoute,
+  ApiPublicWebPushRoute: ApiPublicWebPushRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

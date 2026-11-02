@@ -15,3 +15,6 @@
 
 ## Shared posts
 - Keep the home feed inclusive of text and video posts and periodically refresh its existing query; members viewing an open feed must also receive new public text posts without changing publishing or advertising behavior.
+
+## Phone notifications
+- Background notifications use standard Web Push (public/push-sw.js, VAPID keys derived from WEB_PUSH_KEY_SEED); database triggers call /api/public/web-push on the published URL with a per-event secret, so no third-party push account is needed.

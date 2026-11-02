@@ -1,7 +1,7 @@
 # UI-only redesign
 - [x] Remove the two animated mascot areas; move stories and the existing composer to the top without changing their actions.
-- [ ] Add direct standards-based background Web Push for comments, new posts and new members without Firebase or external accounts.
-- [ ] Test subscription permissions, database event targeting, encrypted delivery, notification clicks and existing preview sections; disclose device-only verification limits.
+- [x] Add direct standards-based background Web Push for comments, new posts and new members without Firebase or external accounts.
+- [x] Tested signing/encryption and rejection of fake send requests; real phone delivery needs publishing and a device test by the owner.
 - [x] Verify signed-in home, composer opening, reels, friends, profile, invite, earnings, notifications and auth page on desktop and phone; no runtime errors or phone overflow. Password-based login was not retested; auth code is unchanged.
 - [x] Apply the selected social-video visual direction to shared theme and presentation components only.
 - [x] Preserve all existing actions, content, ads, playback, routes and data; this verification changed no application code.

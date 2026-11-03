@@ -1,3 +1,10 @@
+# Compact home, image posts, private chat and search
+- [ ] Compact stories and the main advertising slot without changing other advertising or playback.
+- [ ] Explain and obtain the external image provider decision before adoption; implement compressed gallery attachments, durable URL-only storage and lazy loading.
+- [ ] Add private six-digit IDs, exact-ID friendship requests, accepted-only text chat, bilateral deletion and blocking with protected synchronized storage.
+- [ ] Connect main search to relevant YouTube reel results with the search scope clarified.
+- [ ] Verify privacy rules and signed-in flows on phone and desktop; preserve existing features.
+
 # Admin announcements location
 - [ ] Remove only admin announcements from home and add the profile link and separate auto-updating archive page.
 - [ ] Verify the page, existing sections and admin access; explain existing sign-in and recovery without changing credentials.

@@ -106,22 +106,22 @@ export function Stories() {
   });
 
   return (
-    <section dir="rtl" className="border-b border-border py-4">
-      <div className="flex items-center justify-between px-1 pb-4">
+    <section dir="rtl" className="border-b border-border pb-2 pt-0">
+      <div className="flex items-center justify-between px-1 pb-2">
         <h2 className="text-base font-bold text-foreground">
           القصص · Stories
         </h2>
         <span className="text-[10px] text-muted-foreground">24h</span>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {user && (
           <button
             type="button"
             onClick={() => setComposing((v) => !v)}
-            className="flex w-28 shrink-0 flex-col items-center gap-2"
+            className="flex w-16 shrink-0 flex-col items-center gap-1"
           >
-            <span className="grid aspect-[9/16] w-28 place-items-center rounded-lg border border-border bg-secondary text-primary">
+            <span className="grid aspect-[3/4] w-16 place-items-center rounded-lg border border-border bg-secondary text-primary">
               <Plus className="h-5 w-5" />
             </span>
             <span className="truncate text-[10px] text-muted-foreground">أضف</span>
@@ -132,16 +132,16 @@ export function Stories() {
             key={s.id}
             type="button"
             onClick={() => setActive(s)}
-            className="flex w-28 shrink-0 flex-col items-center gap-2"
+            className="flex w-16 shrink-0 flex-col items-center gap-1"
           >
             <span className="block overflow-hidden rounded-lg border border-border">
               <Avatar
                 src={s.image_url ?? s.profiles?.avatar_url}
                 name={s.profiles?.display_name}
-                className="aspect-[9/16] w-28 rounded-lg border-0 text-sm"
+                className="aspect-[3/4] w-16 rounded-lg border-0 text-sm"
               />
             </span>
-            <span className="w-28 truncate text-center text-xs text-muted-foreground">
+            <span className="w-16 truncate text-center text-xs text-muted-foreground">
               {s.profiles?.username}
             </span>
           </button>

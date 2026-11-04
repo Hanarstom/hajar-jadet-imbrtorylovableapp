@@ -14,6 +14,167 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_friendships: {
+        Row: {
+          created_at: string
+          id: string
+          recipient_id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipient_id: string
+          requester_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipient_id?: string
+          requester_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_friendships_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_friendships_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_ids: {
+        Row: {
+          code: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_ids_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_lookup_limits: {
+        Row: {
+          attempts: number
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          attempts?: number
+          user_id: string
+          window_start?: string
+        }
+        Update: {
+          attempts?: number
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          body: string | null
+          created_at: string
+          deleted_at: string | null
+          friendship_id: string
+          id: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          friendship_id: string
+          id?: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          friendship_id?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_friendship_id_fkey"
+            columns: ["friendship_id"]
+            isOneToOne: false
+            referencedRelation: "chat_friendships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           body: string
@@ -105,6 +266,7 @@ export type Database = {
       notifications: {
         Row: {
           actor_id: string | null
+          chat_id: string | null
           created_at: string
           id: string
           is_read: boolean
@@ -115,6 +277,7 @@ export type Database = {
         }
         Insert: {
           actor_id?: string | null
+          chat_id?: string | null
           created_at?: string
           id?: string
           is_read?: boolean
@@ -125,6 +288,7 @@ export type Database = {
         }
         Update: {
           actor_id?: string | null
+          chat_id?: string | null
           created_at?: string
           id?: string
           is_read?: boolean
@@ -354,27 +518,33 @@ export type Database = {
       push_events: {
         Row: {
           actor_id: string
+          chat_id: string | null
           created_at: string
           id: string
           kind: string
+          notification_id: string | null
           post_id: string | null
           recipient_id: string | null
           secret: string
         }
         Insert: {
           actor_id: string
+          chat_id?: string | null
           created_at?: string
           id?: string
           kind: string
+          notification_id?: string | null
           post_id?: string | null
           recipient_id?: string | null
           secret?: string
         }
         Update: {
           actor_id?: string
+          chat_id?: string | null
           created_at?: string
           id?: string
           kind?: string
+          notification_id?: string | null
           post_id?: string | null
           recipient_id?: string | null
           secret?: string
@@ -661,6 +831,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      chat_action: {
+        Args: {
+          _action: string
+          _body?: string
+          _code?: string
+          _target?: string
+        }
+        Returns: Json
+      }
+      chat_state: { Args: never; Returns: Json }
       claim_push_deliveries: {
         Args: { _event: string }
         Returns: {

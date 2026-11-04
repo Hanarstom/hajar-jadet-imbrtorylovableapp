@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as EarningsRouteImport } from './routes/earnings'
 import { Route as FriendsRouteImport } from './routes/friends'
@@ -20,6 +21,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as RPostIdRouteImport } from './routes/r.$postId'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiPublicWebPushRouteImport } from './routes/api/public/web-push'
@@ -27,6 +29,10 @@ import { Route as ApiPublicWebPushRouteImport } from './routes/api/public/web-pu
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -79,6 +85,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const RPostIdRoute = RPostIdRouteImport.update({
   id: '/r/$postId',
   path: '/r/$postId',
@@ -107,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/chat': typeof AuthenticatedChatRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/web-push': typeof ApiPublicWebPushRoute
@@ -123,6 +135,7 @@ export interface FileRoutesByTo {
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/chat': typeof AuthenticatedChatRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/web-push': typeof ApiPublicWebPushRoute
@@ -130,6 +143,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/earnings': typeof EarningsRoute
   '/friends': typeof FriendsRoute
@@ -140,6 +154,7 @@ export interface FileRoutesById {
   '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/r/$postId': typeof RPostIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/web-push': typeof ApiPublicWebPushRoute
@@ -158,6 +173,7 @@ export interface FileRouteTypes {
     | '/reels'
     | '/reset-password'
     | '/terms'
+    | '/chat'
     | '/r/$postId'
     | '/u/$username'
     | '/api/public/web-push'
@@ -174,12 +190,14 @@ export interface FileRouteTypes {
     | '/reels'
     | '/reset-password'
     | '/terms'
+    | '/chat'
     | '/r/$postId'
     | '/u/$username'
     | '/api/public/web-push'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/auth'
     | '/earnings'
     | '/friends'
@@ -190,6 +208,7 @@ export interface FileRouteTypes {
     | '/reels'
     | '/reset-password'
     | '/terms'
+    | '/_authenticated/chat'
     | '/r/$postId'
     | '/u/$username'
     | '/api/public/web-push'
@@ -197,6 +216,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   EarningsRoute: typeof EarningsRoute
   FriendsRoute: typeof FriendsRoute
@@ -219,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -291,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/chat': {
+      id: '/_authenticated/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof AuthenticatedChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/r/$postId': {
       id: '/r/$postId'
       path: '/r/$postId'
@@ -315,8 +349,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedChatRoute: typeof AuthenticatedChatRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedChatRoute: AuthenticatedChatRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   EarningsRoute: EarningsRoute,
   FriendsRoute: FriendsRoute,

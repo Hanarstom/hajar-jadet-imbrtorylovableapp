@@ -1,4 +1,5 @@
 # Compact home, image posts, private chat and search
+- [ ] Current request: implement complete private text chat, incoming/outgoing friendship requests, six-digit private IDs, read receipts, bilateral deletion, blocking and reuse existing phone push; verify two-party flows and disclose device-test limits.
 - [ ] Compact stories and the main advertising slot without changing other advertising or playback.
 - [ ] Explain and obtain the external image provider decision before adoption; implement compressed gallery attachments, durable URL-only storage and lazy loading.
 - [ ] Add private six-digit IDs, exact-ID friendship requests, accepted-only text chat, bilateral deletion and blocking with protected synchronized storage.

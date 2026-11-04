@@ -1,0 +1,78 @@
+CREATE TABLE public.chat_ids (user_id uuid PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE, code text NOT NULL UNIQUE CHECK (code ~ '^[0-9]{6}$'));
+GRANT SELECT ON public.chat_ids TO authenticated; GRANT ALL ON public.chat_ids TO service_role;
+ALTER TABLE public.chat_ids ENABLE ROW LEVEL SECURITY;
+CREATE POLICY chat_id_owner ON public.chat_ids FOR SELECT TO authenticated USING (user_id=auth.uid());
+CREATE TABLE public.chat_friendships (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), requester_id uuid NOT NULL REFERENCES public.profiles(id), recipient_id uuid NOT NULL REFERENCES public.profiles(id), status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','accepted','rejected')), created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), CHECK(requester_id<>recipient_id));
+GRANT SELECT ON public.chat_friendships TO authenticated; GRANT ALL ON public.chat_friendships TO service_role;
+ALTER TABLE public.chat_friendships ENABLE ROW LEVEL SECURITY;
+CREATE POLICY chat_friend_participant ON public.chat_friendships FOR SELECT TO authenticated USING (auth.uid() IN (requester_id,recipient_id));
+CREATE UNIQUE INDEX chat_pair_unique ON public.chat_friendships (least(requester_id,recipient_id),greatest(requester_id,recipient_id));
+CREATE TABLE public.chat_blocks (blocker_id uuid NOT NULL REFERENCES public.profiles(id), blocked_id uuid NOT NULL REFERENCES public.profiles(id), created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY(blocker_id,blocked_id), CHECK(blocker_id<>blocked_id));
+GRANT SELECT ON public.chat_blocks TO authenticated; GRANT ALL ON public.chat_blocks TO service_role;
+ALTER TABLE public.chat_blocks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY chat_block_owner ON public.chat_blocks FOR SELECT TO authenticated USING(blocker_id=auth.uid());
+CREATE TABLE public.chat_messages (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), friendship_id uuid NOT NULL REFERENCES public.chat_friendships(id), sender_id uuid NOT NULL REFERENCES public.profiles(id), body text, created_at timestamptz NOT NULL DEFAULT now(), read_at timestamptz, deleted_at timestamptz, CHECK(body IS NULL OR length(body) BETWEEN 1 AND 4000));
+GRANT SELECT ON public.chat_messages TO authenticated; GRANT ALL ON public.chat_messages TO service_role;
+ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY chat_message_participant ON public.chat_messages FOR SELECT TO authenticated USING(EXISTS(SELECT 1 FROM public.chat_friendships f WHERE f.id=friendship_id AND auth.uid() IN(f.requester_id,f.recipient_id)));
+CREATE INDEX chat_messages_page ON public.chat_messages(friendship_id,created_at DESC);
+CREATE TABLE public.chat_lookup_limits(user_id uuid PRIMARY KEY, window_start timestamptz NOT NULL DEFAULT now(), attempts integer NOT NULL DEFAULT 0);
+GRANT ALL ON public.chat_lookup_limits TO service_role;
+ALTER TABLE public.chat_lookup_limits ENABLE ROW LEVEL SECURITY;
+CREATE OR REPLACE FUNCTION public.assign_private_chat_id() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE c text; BEGIN LOOP c:=lpad((100000+floor(random()*900000))::integer::text,6,'0'); BEGIN INSERT INTO public.chat_ids(user_id,code) VALUES(NEW.id,c); EXIT; EXCEPTION WHEN unique_violation THEN IF EXISTS(SELECT 1 FROM public.chat_ids WHERE user_id=NEW.id) THEN EXIT; END IF; END; END LOOP; RETURN NEW; END $$;
+REVOKE ALL ON FUNCTION public.assign_private_chat_id() FROM PUBLIC,anon,authenticated;
+CREATE TRIGGER assign_chat_id AFTER INSERT ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.assign_private_chat_id();
+DO $$ DECLARE p record; c text; BEGIN FOR p IN SELECT id FROM public.profiles LOOP LOOP c:=(100000+floor(random()*900000))::integer::text; BEGIN INSERT INTO public.chat_ids(user_id,code) VALUES(p.id,c); EXIT; EXCEPTION WHEN unique_violation THEN IF EXISTS(SELECT 1 FROM public.chat_ids WHERE user_id=p.id) THEN EXIT; END IF; END; END LOOP; END LOOP; END $$;
+ALTER TABLE public.notifications ADD COLUMN chat_id uuid;
+ALTER TABLE public.push_events ADD COLUMN chat_id uuid;
+ALTER TABLE public.push_events ADD COLUMN notification_id uuid;
+CREATE OR REPLACE FUNCTION public.chat_state() RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE u uuid:=auth.uid(); BEGIN IF u IS NULL THEN RAISE EXCEPTION 'يجب تسجيل الدخول'; END IF; RETURN jsonb_build_object('friendships',coalesce((SELECT jsonb_agg(x ORDER BY x.updated_at DESC) FROM (SELECT f.*,p.username,p.display_name,p.avatar_url,p.id AS peer_id,EXISTS(SELECT 1 FROM public.chat_blocks b WHERE b.blocker_id=u AND b.blocked_id=p.id) AS blocked_by_me,EXISTS(SELECT 1 FROM public.chat_blocks b WHERE b.blocker_id=p.id AND b.blocked_id=u) AS blocked_by_peer,(SELECT body FROM public.chat_messages m WHERE m.friendship_id=f.id ORDER BY created_at DESC LIMIT 1) AS last_body,(SELECT max(created_at) FROM public.chat_messages m WHERE m.friendship_id=f.id) AS last_message_at,(SELECT count(*) FROM public.chat_messages m WHERE m.friendship_id=f.id AND m.sender_id<>u AND m.read_at IS NULL AND m.deleted_at IS NULL) AS unread FROM public.chat_friendships f JOIN public.profiles p ON p.id=CASE WHEN f.requester_id=u THEN f.recipient_id ELSE f.requester_id END WHERE u IN(f.requester_id,f.recipient_id)) x),'[]'::jsonb)); END $$;
+CREATE OR REPLACE FUNCTION public.chat_action(_action text,_target uuid DEFAULT NULL,_code text DEFAULT NULL,_body text DEFAULT NULL) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE u uuid:=auth.uid(); f public.chat_friendships; peer uuid; m public.chat_messages; n uuid; e uuid; a integer; BEGIN
+IF u IS NULL THEN RAISE EXCEPTION 'يجب تسجيل الدخول'; END IF;
+IF _action='my_id' THEN RETURN jsonb_build_object('code',(SELECT code FROM public.chat_ids WHERE user_id=u)); END IF;
+IF _action IN('lookup','request') THEN
+ IF _code IS NULL OR _code !~ '^[0-9]{6}$' THEN RAISE EXCEPTION 'أدخل ID من 6 أرقام'; END IF;
+ INSERT INTO public.chat_lookup_limits(user_id,attempts) VALUES(u,1) ON CONFLICT(user_id) DO UPDATE SET attempts=CASE WHEN chat_lookup_limits.window_start<now()-interval '1 minute' THEN 1 ELSE chat_lookup_limits.attempts+1 END,window_start=CASE WHEN chat_lookup_limits.window_start<now()-interval '1 minute' THEN now() ELSE chat_lookup_limits.window_start END RETURNING attempts INTO a;
+ IF a>10 THEN RETURN jsonb_build_object('error','محاولات كثيرة؛ انتظر دقيقة'); END IF;
+ SELECT user_id INTO peer FROM public.chat_ids WHERE code=_code;
+ IF peer IS NULL OR peer=u OR EXISTS(SELECT 1 FROM public.chat_blocks WHERE (blocker_id=u AND blocked_id=peer) OR (blocker_id=peer AND blocked_id=u)) THEN RETURN jsonb_build_object('error','لا يمكن الوصول لهذا المستخدم'); END IF;
+ IF _action='lookup' THEN RETURN (SELECT jsonb_build_object('id',id,'username',username,'display_name',display_name,'avatar_url',avatar_url) FROM public.profiles WHERE id=peer); END IF;
+ SELECT * INTO f FROM public.chat_friendships WHERE least(requester_id,recipient_id)=least(u,peer) AND greatest(requester_id,recipient_id)=greatest(u,peer) FOR UPDATE;
+ IF f.id IS NOT NULL THEN RETURN jsonb_build_object('id',f.id,'status',f.status); END IF;
+ IF (SELECT count(*) FROM public.chat_friendships WHERE requester_id=u AND created_at>now()-interval '1 day')>=30 THEN RAISE EXCEPTION 'وصلت للحد اليومي للطلبات'; END IF;
+ INSERT INTO public.chat_friendships(requester_id,recipient_id) VALUES(u,peer) RETURNING * INTO f;
+ INSERT INTO public.notifications(user_id,actor_id,type,meta,chat_id) VALUES(peer,u,'chat_request','طلب صداقة جديد',f.id) RETURNING id INTO n;
+ELSE
+ IF _action='delete' THEN SELECT * INTO m FROM public.chat_messages WHERE id=_target; _target:=m.friendship_id; END IF;
+ SELECT * INTO f FROM public.chat_friendships WHERE id=_target AND u IN(requester_id,recipient_id) FOR UPDATE;
+ IF f.id IS NULL THEN RAISE EXCEPTION 'المحادثة غير متاحة'; END IF;
+ peer:=CASE WHEN f.requester_id=u THEN f.recipient_id ELSE f.requester_id END;
+ IF _action='block' THEN INSERT INTO public.chat_blocks(blocker_id,blocked_id) VALUES(u,peer) ON CONFLICT DO NOTHING;
+ ELSIF _action='unblock' THEN DELETE FROM public.chat_blocks WHERE blocker_id=u AND blocked_id=peer;
+ ELSIF _action='delete' THEN IF m.sender_id<>u OR m.id IS NULL THEN RAISE EXCEPTION 'يمكنك حذف رسائلك فقط'; END IF; UPDATE public.chat_messages SET body=NULL,deleted_at=now() WHERE id=m.id; UPDATE public.notifications SET meta='تم حذف الرسالة' WHERE type='chat_message' AND meta=m.body AND chat_id=f.id AND actor_id=u;
+ ELSIF _action='read' THEN UPDATE public.chat_messages SET read_at=now() WHERE friendship_id=f.id AND sender_id<>u AND read_at IS NULL;
+ ELSE
+ IF EXISTS(SELECT 1 FROM public.chat_blocks WHERE (blocker_id=u AND blocked_id=peer) OR (blocker_id=peer AND blocked_id=u)) THEN RAISE EXCEPTION 'التواصل محظور'; END IF;
+ IF _action IN('accept','reject') THEN IF f.recipient_id<>u OR f.status<>'pending' THEN RAISE EXCEPTION 'الطلب غير متاح'; END IF; UPDATE public.chat_friendships SET status=CASE WHEN _action='accept' THEN 'accepted' ELSE 'rejected' END,updated_at=now() WHERE id=f.id;
+ ELSIF _action='send' THEN
+ IF f.status<>'accepted' THEN RAISE EXCEPTION 'يجب قبول طلب الصداقة أولًا'; END IF;
+ IF _body IS NULL OR length(btrim(_body)) NOT BETWEEN 1 AND 4000 THEN RAISE EXCEPTION 'الرسالة بين 1 و4000 حرف'; END IF;
+ IF (SELECT count(*) FROM public.chat_messages WHERE sender_id=u AND created_at>now()-interval '1 minute')>=60 THEN RAISE EXCEPTION 'انتظر قليلًا قبل إرسال المزيد'; END IF;
+ INSERT INTO public.chat_messages(friendship_id,sender_id,body) VALUES(f.id,u,btrim(_body)) RETURNING * INTO m;
+ UPDATE public.chat_friendships SET updated_at=now() WHERE id=f.id;
+ INSERT INTO public.notifications(user_id,actor_id,type,meta,chat_id) VALUES(peer,u,'chat_message',left(m.body,120),f.id) RETURNING id INTO n;
+ ELSE RAISE EXCEPTION 'إجراء غير صالح'; END IF;
+ END IF;
+END IF;
+IF n IS NOT NULL AND EXISTS(SELECT 1 FROM public.push_subscriptions WHERE user_id=peer) THEN
+ INSERT INTO public.push_events(kind,actor_id,recipient_id,chat_id,notification_id) VALUES(CASE WHEN _action='send' THEN 'chat_message' ELSE 'chat_request' END,u,peer,f.id,n) RETURNING id INTO e;
+ INSERT INTO public.push_deliveries(event_id,subscription_id) SELECT e,id FROM public.push_subscriptions WHERE user_id=peer;
+ PERFORM net.http_post(url:='https://project--7f2b2de9-0888-47fa-89d6-93cefa69597f.lovable.app/api/public/web-push',body:=(SELECT jsonb_build_object('eventId',id,'secret',secret) FROM public.push_events WHERE id=e),timeout_milliseconds:=10000);
+END IF;
+RETURN jsonb_build_object('id',f.id,'ok',true);
+END $$;
+REVOKE ALL ON FUNCTION public.chat_action(text,uuid,text,text),public.chat_state() FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.chat_action(text,uuid,text,text),public.chat_state() TO authenticated;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.chat_messages,public.chat_friendships;
+COMMENT ON TABLE public.chat_ids IS 'Private identifiers; owner read only; exact lookup through rate-limited authenticated RPC.';
+COMMENT ON TABLE public.chat_messages IS 'Participant-only text messages. Sender deletion clears body for both parties; no attachment storage.';

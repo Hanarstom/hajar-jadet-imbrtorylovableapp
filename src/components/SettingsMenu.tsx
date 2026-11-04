@@ -1,4 +1,5 @@
-import { Settings, Moon, Sun } from "lucide-react";
+import { Settings, Moon, Sun, MessageCircle } from "lucide-react";
+import { Link } from '@tanstack/react-router';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,6 +23,7 @@ export function SettingsMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 text-right">
         <DropdownMenuLabel>الإعدادات</DropdownMenuLabel>
+        <DropdownMenuItem asChild><Link to="/chat" className="gap-2"><MessageCircle className="h-4 w-4" />المحادثات الخاصة</Link></DropdownMenuItem>
         <DropdownMenuItem onClick={toggle} className="gap-2 font-semibold">
           {mode === "dark" ? (
             <>

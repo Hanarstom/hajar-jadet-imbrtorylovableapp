@@ -38,6 +38,7 @@ type Notif = {
   created_at: string;
   actor_id: string | null;
   post_id: string | null;
+  chat_id: string | null;
 };
 
 const REACTION_LABEL: Record<string, string> = {
@@ -58,7 +59,7 @@ function Notifications() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("notifications")
-        .select("id, type, meta, is_read, created_at, actor_id, post_id")
+        .select("id, type, meta, is_read, created_at, actor_id, post_id, chat_id")
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -161,6 +162,8 @@ function Notifications() {
                   ? `${name} حدّث صورة ملفه الشخصي 🖼️`
                   : n.type === "comment"
                     ? `${name} علّق: ${n.meta ?? ""}`
+                    : n.type === 'chat_message' ? `${name}: ${n.meta ?? 'رسالة خاصة'}`
+                    : n.type === 'chat_request' ? `${name} أرسل طلب صداقة`
                     : `${name} ${REACTION_LABEL[n.meta ?? "like"] ?? "تفاعل مع"} ريلك`;
             const Icon =
               n.type === "follow"
@@ -185,6 +188,7 @@ function Notifications() {
                   <span className="block text-[11px] text-muted-foreground">
                     {new Date(n.created_at).toLocaleString()}
                   </span>
+                  {n.chat_id && <Link to="/chat" search={{ conversation:n.chat_id }} className="text-xs text-primary underline">{n.type==='chat_request'?'عرض الطلب':'فتح المحادثة'}</Link>}
                 </span>
                 <Icon className="h-4 w-4 shrink-0 text-destructive" />
               </li>

@@ -16,6 +16,8 @@ const TEXT: Record<string, string> = {
   reaction: "تفاعل جديد على الريل الخاص بك ❤️",
   avatar: "أحد أصدقائك حدّث صورته الشخصية 🖼️",
   admin: "إعلان جديد من إدارة المنصة 📣",
+  chat_message: "وصلتك رسالة خاصة جديدة",
+  chat_request: "وصل طلب صداقة جديد",
 };
 
 /**
@@ -48,11 +50,13 @@ export function useNotificationAlerts() {
         seen.current = new Set(rows.map((r) => r.id));
         return rows.length;
       }
-      const fresh = rows.filter((r) => !seen.current!.has(r.id));
-      fresh.forEach((r) => seen.current!.add(r.id));
+      const known = seen.current;
+      const fresh = rows.filter((r) => !known.has(r.id));
+      fresh.forEach((r) => known.add(r.id));
       if (fresh.length > 0) {
         playNotificationSound();
-        const first = fresh[0]!;
+        const first = fresh[0];
+        if (!first) return rows.length;
         void showSystemNotification(
           "منصة حجر الجاديت الإمبراطوري",
           TEXT[first.type] ?? "لديك إشعار جديد",

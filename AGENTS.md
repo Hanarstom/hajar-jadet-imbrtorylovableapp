@@ -19,3 +19,8 @@
 
 ## Phone notifications
 - Background notifications use standard Web Push (public/push-sw.js, VAPID keys derived from WEB_PUSH_KEY_SEED); database triggers call /api/public/web-push on the published URL with a per-event secret, so no third-party push account is needed.
+
+## Private chat
+- Keep chat under the authenticated chat route with exact-ID discovery; private IDs, friendships, blocks and message mutations are authorized by database RPCs rather than client-supplied identity, so public profiles never expose chat IDs.
+- Reuse push_events, notifications and the existing Web Push endpoint for targeted chat alerts; verify recipient and blocks again at delivery to avoid stale or misdirected notifications.
+- Chat uses participant-scoped Realtime with paginated reads and polling fallback; sender deletion clears stored message content for both participants without changing public post behavior.

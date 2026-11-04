@@ -1,8 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
-import { z } from 'zod';
-
-export const chatCode = z.string().regex(/^[0-9]{6}$/, 'أدخل ID من 6 أرقام');
-export const chatBody = z.string().trim().min(1, 'اكتب رسالة').max(4000);
+import { chatCode, chatBody } from './chat-schema';
+export { chatCode, chatBody } from './chat-schema';
 export type Friendship = { id: string; requester_id: string; recipient_id: string; status: 'pending' | 'accepted' | 'rejected'; peer_id: string; username: string; display_name: string; avatar_url: string | null; blocked_by_me: boolean; blocked_by_peer: boolean; last_body: string | null; last_message_at: string | null; unread: number; updated_at: string };
 export type Peer = { id: string; username: string; display_name: string; avatar_url: string | null };
 export async function chatAction(action: string, target?: string, code?: string, body?: string) {

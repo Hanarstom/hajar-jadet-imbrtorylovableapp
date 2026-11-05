@@ -89,6 +89,39 @@ export type Database = {
           },
         ]
       }
+      chat_history_clears: {
+        Row: {
+          cleared_at: string
+          friendship_id: string
+          user_id: string
+        }
+        Insert: {
+          cleared_at?: string
+          friendship_id: string
+          user_id: string
+        }
+        Update: {
+          cleared_at?: string
+          friendship_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_history_clears_friendship_id_fkey"
+            columns: ["friendship_id"]
+            isOneToOne: false
+            referencedRelation: "chat_friendships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_history_clears_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_ids: {
         Row: {
           code: string
@@ -170,6 +203,32 @@ export type Database = {
             foreignKeyName: "chat_messages_sender_id_fkey"
             columns: ["sender_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_preferences: {
+        Row: {
+          hide_presence: boolean
+          sound_enabled: boolean
+          user_id: string
+        }
+        Insert: {
+          hide_presence?: boolean
+          sound_enabled?: boolean
+          user_id: string
+        }
+        Update: {
+          hide_presence?: boolean
+          sound_enabled?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -745,6 +804,21 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          role: string
+          user_id: string
+        }
+        Insert: {
+          role: string
+          user_id: string
+        }
+        Update: {
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       verifications: {
         Row: {
           created_at: string
@@ -831,6 +905,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_chat_ids: {
+        Args: { _offset?: number }
+        Returns: {
+          code: string
+          display_name: string
+          user_id: string
+          username: string
+        }[]
+      }
       chat_action: {
         Args: {
           _action: string
@@ -858,10 +941,15 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      clear_chat_history: {
+        Args: { _both?: boolean; _friendship: string }
+        Returns: undefined
+      }
       evaluate_referral_activity: {
         Args: { _user: string }
         Returns: undefined
       }
+      has_chat_admin_role: { Args: never; Returns: boolean }
       leaderboard_24h: {
         Args: never
         Returns: {
@@ -876,6 +964,7 @@ export type Database = {
         Args: { _meta: string; _post_id: string; _type: string }
         Returns: undefined
       }
+      purge_expired_chat: { Args: never; Returns: undefined }
       record_watch_time: { Args: { _seconds: number }; Returns: undefined }
       register_post_view: { Args: { _post_id: string }; Returns: undefined }
       register_profile_view: {

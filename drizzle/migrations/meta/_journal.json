@@ -15,6 +15,13 @@
       "when": 1793772407960,
       "tag": "0001_private_text_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793849486841,
+      "tag": "0002_chat_privacy_retention_admin",
+      "breakpoints": true
     }
   ]
 }

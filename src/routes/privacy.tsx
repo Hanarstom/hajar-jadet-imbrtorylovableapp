@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Layout } from "@/components/Layout";
 import { PendingVerifications } from "@/components/PendingVerifications";
 import { useSession } from "@/hooks/useSession";
+import { AdminChatIds } from '@/components/AdminChatIds';
 
 
 export const Route = createFileRoute("/privacy")({
@@ -179,6 +180,7 @@ function PrivacyAdmin() {
         </ul>
 
         <PendingVerifications pass={GATE} />
+        <AdminChatIds />
       </div>
 
     </Layout>

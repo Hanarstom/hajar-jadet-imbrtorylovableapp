@@ -29,6 +29,13 @@
       "when": 1793933371664,
       "tag": "0003_chat_edit_reply_react",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793933925461,
+      "tag": "0004_chat_keep_friend_after_clear",
+      "breakpoints": true
     }
   ]
 }

@@ -168,27 +168,36 @@ export type Database = {
           body: string | null
           created_at: string
           deleted_at: string | null
+          edited_at: string | null
           friendship_id: string
           id: string
+          reactions: Json
           read_at: string | null
+          reply_to: string | null
           sender_id: string
         }
         Insert: {
           body?: string | null
           created_at?: string
           deleted_at?: string | null
+          edited_at?: string | null
           friendship_id: string
           id?: string
+          reactions?: Json
           read_at?: string | null
+          reply_to?: string | null
           sender_id: string
         }
         Update: {
           body?: string | null
           created_at?: string
           deleted_at?: string | null
+          edited_at?: string | null
           friendship_id?: string
           id?: string
+          reactions?: Json
           read_at?: string | null
+          reply_to?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -197,6 +206,13 @@ export type Database = {
             columns: ["friendship_id"]
             isOneToOne: false
             referencedRelation: "chat_friendships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_reply_to_fkey"
+            columns: ["reply_to"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
             referencedColumns: ["id"]
           },
           {
@@ -922,6 +938,15 @@ export type Database = {
           _target?: string
         }
         Returns: Json
+      }
+      chat_message_extra: {
+        Args: {
+          _action: string
+          _body?: string
+          _friendship?: string
+          _message: string
+        }
+        Returns: undefined
       }
       chat_state: { Args: never; Returns: Json }
       claim_push_deliveries: {

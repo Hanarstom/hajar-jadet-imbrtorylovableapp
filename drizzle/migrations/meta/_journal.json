@@ -22,6 +22,13 @@
       "when": 1793849486841,
       "tag": "0002_chat_privacy_retention_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793933371664,
+      "tag": "0003_chat_edit_reply_react",
+      "breakpoints": true
     }
   ]
 }

@@ -42,10 +42,10 @@ function Chat() {
   const [replyTo, setReplyTo] = useState<string>();
   const [editing, setEditing] = useState<string>();
   const [peerTyping, setPeerTyping] = useState(false);
-  const typingChannel = useRef<ReturnType<typeof supabase.channel>>();
+  const typingChannel = useRef<ReturnType<typeof supabase.channel> | undefined>(undefined);
   const lastTypingSent = useRef(0);
-  const pressTimer = useRef<number>();
-  const wasOnline = useRef<boolean>();
+  const pressTimer = useRef<number | undefined>(undefined);
+  const wasOnline = useRef<boolean | undefined>(undefined);
   const end = useRef<HTMLDivElement>(null);
   const active = state.data.find(f => f.id === conversation);
   const blocked = active?.blocked_by_me || active?.blocked_by_peer;
